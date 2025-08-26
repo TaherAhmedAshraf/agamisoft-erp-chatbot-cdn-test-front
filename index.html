@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat Widget Demo - Customer Support</title>
+
+    <!-- Chat Widget CSS -->
+    <link rel="stylesheet" href="chat-widget.css">
+
+    <style>
+        /* Demo page styles */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 40px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: white;
+        }
+
+        .demo-container {
+            max-width: 800px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            margin-bottom: 3rem;
+            opacity: 0.9;
+        }
+
+        .demo-section {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 2rem;
+            margin: 2rem 0;
+            text-align: left;
+        }
+
+        .demo-section h2 {
+            margin-top: 0;
+            color: #fff;
+        }
+
+        .code-block {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 1rem 0;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            overflow-x: auto;
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+
+        .feature-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+        }
+
+        .feature-icon {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .demo-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin: 2rem 0;
+        }
+
+        .demo-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .demo-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 20px;
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
+
+            .demo-section {
+                padding: 1.5rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="demo-container">
+        <h1>🚀 Chat Widget CDN</h1>
+        <p class="subtitle">Easy-to-integrate customer support chat widget for any website</p>
+
+        <div class="demo-section">
+            <h2>✨ Features</h2>
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">💬</div>
+                    <h3>Real-time Chat</h3>
+                    <p>Instant messaging with Socket.IO</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🤖</div>
+                    <h3>AI & Human Agents</h3>
+                    <p>Seamless handoff between AI and human support</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📱</div>
+                    <h3>Mobile Responsive</h3>
+                    <p>Works perfectly on all devices</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🎨</div>
+                    <h3>Customizable Themes</h3>
+                    <p>Light and dark themes available</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">⚡</div>
+                    <h3>Zero Dependencies</h3>
+                    <p>Only requires Socket.IO</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🔧</div>
+                    <h3>Easy Integration</h3>
+                    <p>Just 3 lines of code to set up</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="demo-section">
+            <h2>🚀 Quick Setup</h2>
+            <p>Add the chat widget to your website in just 3 simple steps:</p>
+
+            <h3>Step 1: Include Socket.IO</h3>
+            <div class="code-block">
+                &lt;script src="https://cdn.socket.io/4.7.4/socket.io.min.js"&gt;&lt;/script&gt;
+            </div>
+
+            <h3>Step 2: Include Chat Widget Files</h3>
+            <div class="code-block">
+                &lt;link rel="stylesheet" href="https://your-cdn.com/chat-widget.css"&gt;
+                &lt;script src="https://your-cdn.com/chat-widget.js"&gt;&lt;/script&gt;
+            </div>
+
+            <h3>Step 3: Initialize the Widget</h3>
+            <div class="code-block">
+                &lt;script&gt;
+                ChatWidget.init({
+                serverUrl: 'http://your-backend-url',
+                position: 'bottom-right',
+                theme: 'default',
+                companyName: 'Your Company',
+                welcomeMessage: 'Hello! How can we help you today?'
+                });
+                &lt;/script&gt;
+            </div>
+        </div>
+
+        <div class="demo-section">
+            <h2>⚙️ Configuration Options</h2>
+            <div class="code-block">
+                ChatWidget.init({
+                serverUrl: 'http://your-backend-url', // Required: Your socket server URL
+                position: 'bottom-right', // 'bottom-right' or 'bottom-left'
+                theme: 'default', // 'default' or 'dark'
+                companyName: 'Your Company', // Company name in header
+                welcomeMessage: 'Hello! How can we help?', // Welcome message
+                buttonText: 'Chat with us', // Tooltip for chat button
+                showMinimizeButton: true, // Show minimize button
+                autoOpen: false, // Auto-open widget on load
+                debug: false // Enable debug logging
+                });
+            </div>
+        </div>
+
+        <div class="demo-section">
+            <h2>🎮 API Methods</h2>
+            <div class="code-block">
+                // Open the chat widget
+                ChatWidget.open();
+
+                // Close the chat widget
+                ChatWidget.close();
+
+                // Get current state
+                const state = ChatWidget.getState();
+
+                // Destroy the widget
+                ChatWidget.destroy();
+            </div>
+        </div>
+
+        <div class="demo-section">
+            <h2>🎨 Themes</h2>
+            <p>The widget comes with built-in light and dark themes:</p>
+
+            <div class="demo-buttons">
+                <button class="demo-btn" onclick="switchTheme('default')">Light Theme</button>
+                <button class="demo-btn" onclick="switchTheme('dark')">Dark Theme</button>
+                <button class="demo-btn" onclick="switchPosition('bottom-right')">Bottom Right</button>
+                <button class="demo-btn" onclick="switchPosition('bottom-left')">Bottom Left</button>
+            </div>
+        </div>
+
+        <div class="demo-section">
+            <h2>📋 Browser Support</h2>
+            <p>The chat widget supports all modern browsers:</p>
+            <ul>
+                <li>Chrome 60+</li>
+                <li>Firefox 55+</li>
+                <li>Safari 11+</li>
+                <li>Edge 79+</li>
+                <li>Mobile browsers (iOS Safari, Chrome Mobile)</li>
+            </ul>
+        </div>
+
+        <div class="demo-section">
+            <h2>🔧 Complete Example</h2>
+            <div class="code-block">
+                &lt;!DOCTYPE html&gt;
+                &lt;html lang="en"&gt;
+                &lt;head&gt;
+                &lt;meta charset="UTF-8"&gt;
+                &lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;
+                &lt;title&gt;My Website&lt;/title&gt;
+
+                &lt;!-- Socket.IO --&gt;
+                &lt;script src="https://cdn.socket.io/4.7.4/socket.io.min.js"&gt;&lt;/script&gt;
+
+                &lt;!-- Chat Widget --&gt;
+                &lt;link rel="stylesheet" href="https://your-cdn.com/chat-widget.css"&gt;
+                &lt;script src="https://your-cdn.com/chat-widget.js"&gt;&lt;/script&gt;
+                &lt;/head&gt;
+                &lt;body&gt;
+                &lt;h1&gt;Welcome to My Website&lt;/h1&gt;
+                &lt;p&gt;Your website content here...&lt;/p&gt;
+
+                &lt;script&gt;
+                // Initialize chat widget
+                ChatWidget.init({
+                serverUrl: 'ws://localhost:3000',
+                companyName: 'My Company Support',
+                welcomeMessage: 'Hi there! How can we help you today?',
+                theme: 'default',
+                position: 'bottom-right'
+                });
+                &lt;/script&gt;
+                &lt;/body&gt;
+                &lt;/html&gt;
+            </div>
+        </div>
+
+        <div class="demo-buttons">
+            <button class="demo-btn" onclick="ChatWidget.open()">Open Chat Widget</button>
+            <button class="demo-btn" onclick="location.reload()">Reload Demo</button>
+        </div>
+    </div>
+
+    <!-- Socket.IO CDN -->
+    <script src="https://cdn.socket.io/4.7.4/socket.io.min.js"></script>
+
+    <!-- Chat Widget -->
+    <script src="chat-widget.js"></script>
+
+    <script>
+        // Initialize the chat widget for demo
+        ChatWidget.init({
+            serverUrl: 'ws://localhost:3000', // Change this to your actual server URL
+            companyName: 'Demo Support',
+            welcomeMessage: 'Welcome to our chat widget demo! This is a fully functional chat widget.',
+            theme: 'default',
+            position: 'bottom-right',
+            debug: true // Enable debug mode for demo
+        });
+
+        // Demo functions
+        function switchTheme(theme) {
+            ChatWidget.destroy();
+            setTimeout(() => {
+                ChatWidget.init({
+                    serverUrl: 'ws://localhost:3000',
+                    companyName: 'Demo Support',
+                    welcomeMessage: 'Theme changed! This is a demo of the chat widget.',
+                    theme: theme,
+                    position: getCurrentPosition(),
+                    debug: true
+                });
+            }, 100);
+        }
+
+        function switchPosition(position) {
+            const currentTheme = getCurrentTheme();
+            ChatWidget.destroy();
+            setTimeout(() => {
+                ChatWidget.init({
+                    serverUrl: 'ws://localhost:3000',
+                    companyName: 'Demo Support',
+                    welcomeMessage: 'Position changed! This is a demo of the chat widget.',
+                    theme: currentTheme,
+                    position: position,
+                    debug: true
+                });
+            }, 100);
+        }
+
+        function getCurrentTheme() {
+            const container = document.querySelector('.chat-widget-container');
+            return container && container.classList.contains('dark') ? 'dark' : 'default';
+        }
+
+        function getCurrentPosition() {
+            const container = document.querySelector('.chat-widget-container');
+            return container && container.classList.contains('bottom-left') ? 'bottom-left' : 'bottom-right';
+        }
+
+        // Show connection status
+        setTimeout(() => {
+            const state = ChatWidget.getState();
+            console.log('Chat Widget State:', state);
+
+            if (!state.isConnected) {
+                console.warn('Demo Note: Chat widget is not connected to a real server. Please update the serverUrl to connect to your actual chat server.');
+            }
+        }, 2000);
+    </script>
+</body>
+
+</html>

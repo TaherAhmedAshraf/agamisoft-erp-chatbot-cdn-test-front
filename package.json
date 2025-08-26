@@ -1,0 +1,31 @@
+{
+    "name": "chat-widget-cdn-test",
+    "version": "1.0.0",
+    "description": "Test server for Chat Widget CDN",
+    "main": "test-server.js",
+    "scripts": {
+        "start": "node test-server.js",
+        "dev": "nodemon test-server.js",
+        "test": "echo \"No tests specified\" && exit 0"
+    },
+    "keywords": [
+        "chat",
+        "widget",
+        "socket.io",
+        "customer-support",
+        "cdn"
+    ],
+    "author": "Your Name",
+    "license": "MIT",
+    "dependencies": {
+        "express": "^4.18.2",
+        "socket.io": "^4.7.4",
+        "cors": "^2.8.5"
+    },
+    "devDependencies": {
+        "nodemon": "^3.0.2"
+    },
+    "engines": {
+        "node": ">=14.0.0"
+    }
+}
