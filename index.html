@@ -107,6 +107,83 @@
             transform: translateY(-2px);
         }
 
+        /* Customization Controls */
+        .customization-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+
+        .customization-group {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 1.5rem;
+        }
+
+        .customization-group h3 {
+            margin-top: 0;
+            margin-bottom: 1rem;
+            color: #fff;
+            font-size: 1.1rem;
+        }
+
+        .color-picker label,
+        .button-controls label,
+        .position-controls label,
+        .text-controls label {
+            display: block;
+            margin-bottom: 0.8rem;
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 0.9rem;
+        }
+
+        .color-picker input[type="color"] {
+            width: 50px;
+            height: 30px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+
+        .button-controls select,
+        .position-controls select {
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 6px;
+            margin-left: 10px;
+            font-size: 0.9rem;
+        }
+
+        .button-controls select option {
+            background: #333;
+            color: white;
+        }
+
+        .button-controls input[type="range"],
+        .position-controls input[type="range"] {
+            width: 120px;
+            margin-left: 10px;
+        }
+
+        .text-controls input[type="text"] {
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 6px;
+            margin-left: 10px;
+            font-size: 0.9rem;
+            width: 200px;
+        }
+
+        .text-controls input[type="text"]::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
         @media (max-width: 768px) {
             body {
                 padding: 20px;
@@ -125,7 +202,7 @@
 
 <body>
     <div class="demo-container">
-        <h1>🚀 Chat Widget CDN</h1>
+        <h1>🚀 Agami Customer Support</h1>
         <p class="subtitle">Easy-to-integrate customer support chat widget for any website</p>
 
         <div class="demo-section">
@@ -198,15 +275,124 @@
             <div class="code-block">
                 ChatWidget.init({
                 serverUrl: 'http://your-backend-url', // Required: Your socket server URL
-                position: 'bottom-right', // 'bottom-right' or 'bottom-left'
+                position: { corner: 'bottom-right', offset: { x: 20, y: 20 } }, // 'bottom-right', 'bottom-left', 'top-right', 'top-left'
                 theme: 'default', // 'default' or 'dark'
                 companyName: 'Your Company', // Company name in header
                 welcomeMessage: 'Hello! How can we help?', // Welcome message
                 buttonText: 'Chat with us', // Tooltip for chat button
                 showMinimizeButton: true, // Show minimize button
                 autoOpen: false, // Auto-open widget on load
-                debug: false // Enable debug logging
+                debug: false, // Enable debug logging
+                
+                // Enhanced UI Customization
+                colors: {
+                    primary: '#667eea',
+                    secondary: '#764ba2',
+                    accent: '#ff6b6b',
+                    background: '#ffffff',
+                    text: '#333333'
+                },
+                
+                button: {
+                    size: 60,
+                    shape: 'circle', // 'circle', 'rounded', 'square'
+                    icon: 'default', // 'default', 'message', 'chat', 'support', 'help', 'custom'
+                    hoverEffect: 'scale', // 'scale', 'glow', 'bounce', 'none'
+                    showNotification: false
+                },
+                
+                dimensions: {
+                    width: 350,
+                    height: 500
+                },
+                
+                text: {
+                    companyName: 'Your Company',
+                    welcomeMessage: 'Hello! How can we help?',
+                    buttonText: 'Chat with us'
+                }
                 });
+            </div>
+        </div>
+
+        <div class="demo-section">
+            <h2>🎨 Live Customization Demo</h2>
+            <p>Try out the new customization options in real-time:</p>
+            
+            <div class="customization-grid">
+                <div class="customization-group">
+                    <h3>🎨 Colors</h3>
+                    <div class="color-picker">
+                        <label>Primary Color: <input type="color" id="primary-color" value="#667eea"></label>
+                        <label>Secondary Color: <input type="color" id="secondary-color" value="#764ba2"></label>
+                        <label>Accent Color: <input type="color" id="accent-color" value="#ff6b6b"></label>
+                        <label>Background Color: <input type="color" id="background-color" value="#ffffff"></label>
+                        <label>Surface Color: <input type="color" id="surface-color" value="#f8f9fa"></label>
+                        <label>Text Color: <input type="color" id="text-color" value="#333333"></label>
+                        <label>Secondary Text: <input type="color" id="text-secondary-color" value="#666666"></label>
+                    </div>
+                </div>
+                
+                <div class="customization-group">
+                    <h3>🔘 Button Style</h3>
+                    <div class="button-controls">
+                        <label>Shape: 
+                            <select id="button-shape">
+                                <option value="circle">Circle</option>
+                                <option value="rounded">Rounded</option>
+                                <option value="square">Square</option>
+                            </select>
+                        </label>
+                        <label>Icon: 
+                            <select id="button-icon">
+                                <option value="default">Default</option>
+                                <option value="message">Message</option>
+                                <option value="chat">Chat</option>
+                                <option value="support">Support</option>
+                                <option value="help">Help</option>
+                            </select>
+                        </label>
+                        <label>Hover Effect: 
+                            <select id="button-hover">
+                                <option value="scale">Scale</option>
+                                <option value="glow">Glow</option>
+                                <option value="bounce">Bounce</option>
+                                <option value="none">None</option>
+                            </select>
+                        </label>
+                        <label>Size: <input type="range" id="button-size" min="40" max="80" value="60"></label>
+                    </div>
+                </div>
+                
+                <div class="customization-group">
+                    <h3>📍 Position</h3>
+                    <div class="position-controls">
+                        <label>Corner: 
+                            <select id="position-corner">
+                                <option value="bottom-right">Bottom Right</option>
+                                <option value="bottom-left">Bottom Left</option>
+                                <option value="top-right">Top Right</option>
+                                <option value="top-left">Top Left</option>
+                            </select>
+                        </label>
+                        <label>Offset X: <input type="range" id="offset-x" min="10" max="50" value="20"></label>
+                        <label>Offset Y: <input type="range" id="offset-y" min="10" max="50" value="20"></label>
+                    </div>
+                </div>
+                
+                <div class="customization-group">
+                    <h3>📝 Text Content</h3>
+                    <div class="text-controls">
+                        <label>Company Name: <input type="text" id="company-name" value="Demo Support"></label>
+                        <label>Welcome Message: <input type="text" id="welcome-message" value="Welcome to our chat widget demo!"></label>
+                        <label>Button Text: <input type="text" id="button-text" value="Chat with us"></label>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="demo-buttons">
+                <button class="demo-btn" onclick="applyCustomization()">Apply Changes</button>
+                <button class="demo-btn" onclick="resetCustomization()">Reset to Default</button>
             </div>
         </div>
 
@@ -306,8 +492,42 @@
             companyName: 'Demo Support',
             welcomeMessage: 'Welcome to our chat widget demo! This is a fully functional chat widget.',
             theme: 'default',
-            position: 'bottom-right',
-            debug: true // Enable debug mode for demo
+            position: { corner: 'bottom-right', offset: { x: 20, y: 20 } },
+            debug: true, // Enable debug mode for demo
+            
+            // Enhanced customization options
+            colors: {
+                primary: '#667eea',
+                secondary: '#764ba2',
+                accent: '#ff6b6b',
+                background: '#ffffff',
+                text: '#333333'
+            },
+            
+            button: {
+                size: 60,
+                shape: 'circle',
+                icon: 'default',
+                hoverEffect: 'scale'
+            },
+            
+            text: {
+                companyName: 'Demo Support',
+                welcomeMessage: 'Welcome to our chat widget demo! This is a fully functional chat widget.',
+                buttonText: 'Chat with us',
+                connectingText: 'Connecting to chat service...',
+                startChatText: 'Please provide your details to start chatting:',
+                nameLabel: 'Name *',
+                phoneLabel: 'Phone *',
+                emailLabel: 'Email',
+                startChatButton: 'Start Chat',
+                minimizeButton: 'Minimize',
+                closeButton: 'Close',
+                sendButton: 'Send',
+                typingText: 'Agent is typing...',
+                placeholderText: 'Type your message...',
+                noMessagesText: 'No messages yet. Start the conversation!'
+            }
         });
 
         // Demo functions
@@ -320,7 +540,37 @@
                     welcomeMessage: 'Theme changed! This is a demo of the chat widget.',
                     theme: theme,
                     position: getCurrentPosition(),
-                    debug: true
+                    debug: true,
+                    colors: {
+                        primary: '#667eea',
+                        secondary: '#764ba2',
+                        accent: '#ff6b6b',
+                        background: '#ffffff',
+                        text: '#333333'
+                    },
+                    button: {
+                        size: 60,
+                        shape: 'circle',
+                        icon: 'default',
+                        hoverEffect: 'scale'
+                    },
+                    text: {
+                        companyName: 'Demo Support',
+                        welcomeMessage: 'Theme changed! This is a demo of the chat widget.',
+                        buttonText: 'Chat with us',
+                        connectingText: 'Connecting to chat service...',
+                        startChatText: 'Please provide your details to start chatting:',
+                        nameLabel: 'Name *',
+                        phoneLabel: 'Phone *',
+                        emailLabel: 'Email',
+                        startChatButton: 'Start Chat',
+                        minimizeButton: 'Minimize',
+                        closeButton: 'Close',
+                        sendButton: 'Send',
+                        typingText: 'Agent is typing...',
+                        placeholderText: 'Type your message...',
+                        noMessagesText: 'No messages yet. Start the conversation!'
+                    }
                 });
             }, 100);
         }
@@ -334,8 +584,38 @@
                     companyName: 'Demo Support',
                     welcomeMessage: 'Position changed! This is a demo of the chat widget.',
                     theme: currentTheme,
-                    position: position,
-                    debug: true
+                    position: { corner: position, offset: { x: 20, y: 20 } },
+                    debug: true,
+                    colors: {
+                        primary: '#667eea',
+                        secondary: '#764ba2',
+                        accent: '#ff6b6b',
+                        background: '#ffffff',
+                        text: '#333333'
+                    },
+                    button: {
+                        size: 60,
+                        shape: 'circle',
+                        icon: 'default',
+                        hoverEffect: 'scale'
+                    },
+                    text: {
+                        companyName: 'Demo Support',
+                        welcomeMessage: 'Position changed! This is a demo of the chat widget.',
+                        buttonText: 'Chat with us',
+                        connectingText: 'Connecting to chat service...',
+                        startChatText: 'Please provide your details to start chatting:',
+                        nameLabel: 'Name *',
+                        phoneLabel: 'Phone *',
+                        emailLabel: 'Email',
+                        startChatButton: 'Start Chat',
+                        minimizeButton: 'Minimize',
+                        closeButton: 'Close',
+                        sendButton: 'Send',
+                        typingText: 'Agent is typing...',
+                        placeholderText: 'Type your message...',
+                        noMessagesText: 'No messages yet. Start the conversation!'
+                    }
                 });
             }, 100);
         }
@@ -347,7 +627,13 @@
 
         function getCurrentPosition() {
             const container = document.querySelector('.chat-widget-container');
-            return container && container.classList.contains('bottom-left') ? 'bottom-left' : 'bottom-right';
+            if (container) {
+                if (container.classList.contains('bottom-left')) return 'bottom-left';
+                if (container.classList.contains('top-right')) return 'top-right';
+                if (container.classList.contains('top-left')) return 'top-left';
+                return 'bottom-right';
+            }
+            return 'bottom-right';
         }
 
         // Show connection status
@@ -359,6 +645,142 @@
                 console.warn('Demo Note: Chat widget is not connected to a real server. Please update the serverUrl to connect to your actual chat server.');
             }
         }, 2000);
+
+        // Live Customization Functions
+        function applyCustomization() {
+            const colors = {
+                primary: document.getElementById('primary-color').value,
+                secondary: document.getElementById('secondary-color').value,
+                accent: document.getElementById('accent-color').value,
+                background: document.getElementById('background-color').value,
+                surface: document.getElementById('surface-color').value,
+                text: document.getElementById('text-color').value,
+                textSecondary: document.getElementById('text-secondary-color').value,
+                border: '#e9ecef',
+                shadow: 'rgba(0, 0, 0, 0.12)'
+            };
+
+            const button = {
+                shape: document.getElementById('button-shape').value,
+                icon: document.getElementById('button-icon').value,
+                hoverEffect: document.getElementById('button-hover').value,
+                size: parseInt(document.getElementById('button-size').value)
+            };
+
+            const position = {
+                corner: document.getElementById('position-corner').value,
+                offset: {
+                    x: parseInt(document.getElementById('offset-x').value),
+                    y: parseInt(document.getElementById('offset-y').value)
+                }
+            };
+
+            const text = {
+                companyName: document.getElementById('company-name').value,
+                welcomeMessage: document.getElementById('welcome-message').value,
+                buttonText: document.getElementById('button-text').value
+            };
+
+            // Apply all changes
+            ChatWidget.updateColors(colors);
+            ChatWidget.updateButton(button);
+            ChatWidget.updatePosition(position);
+            ChatWidget.updateText(text);
+
+            // Show success message
+            showNotification('Customization applied successfully!', 'success');
+        }
+
+        function resetCustomization() {
+            // Reset form values
+            document.getElementById('primary-color').value = '#667eea';
+            document.getElementById('secondary-color').value = '#764ba2';
+            document.getElementById('accent-color').value = '#ff6b6b';
+            document.getElementById('background-color').value = '#ffffff';
+            document.getElementById('surface-color').value = '#f8f9fa';
+            document.getElementById('text-color').value = '#333333';
+            document.getElementById('text-secondary-color').value = '#666666';
+            document.getElementById('button-shape').value = 'circle';
+            document.getElementById('button-icon').value = 'default';
+            document.getElementById('button-hover').value = 'scale';
+            document.getElementById('button-size').value = 60;
+            document.getElementById('position-corner').value = 'bottom-right';
+            document.getElementById('offset-x').value = 20;
+            document.getElementById('offset-y').value = 20;
+            document.getElementById('company-name').value = 'Demo Support';
+            document.getElementById('welcome-message').value = 'Welcome to our chat widget demo!';
+            document.getElementById('button-text').value = 'Chat with us';
+
+            // Reset widget to default
+            ChatWidget.destroy();
+            setTimeout(() => {
+                ChatWidget.init({
+                    serverUrl: 'ws://localhost:3000',
+                    companyName: 'Demo Support',
+                    welcomeMessage: 'Welcome to our chat widget demo! This is a fully functional chat widget.',
+                    theme: 'default',
+                    position: { corner: 'bottom-right', offset: { x: 20, y: 20 } },
+                    debug: true
+                });
+            }, 100);
+
+            showNotification('Reset to default settings!', 'info');
+        }
+
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `notification notification-${type}`;
+            notification.textContent = message;
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                padding: 12px 20px;
+                border-radius: 8px;
+                color: white;
+                font-weight: 500;
+                z-index: 10000;
+                animation: slideIn 0.3s ease;
+            `;
+
+            // Set background color based on type
+            switch (type) {
+                case 'success':
+                    notification.style.background = '#51cf66';
+                    break;
+                case 'error':
+                    notification.style.background = '#ff4444';
+                    break;
+                default:
+                    notification.style.background = '#667eea';
+            }
+
+            document.body.appendChild(notification);
+
+            // Remove after 3 seconds
+            setTimeout(() => {
+                notification.style.animation = 'slideOut 0.3s ease';
+                setTimeout(() => {
+                    if (notification.parentNode) {
+                        notification.parentNode.removeChild(notification);
+                    }
+                }, 300);
+            }, 3000);
+        }
+
+        // Add CSS animations for notifications
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideIn {
+                from { transform: translateX(100%); opacity: 0; }
+                to { transform: translateX(0); opacity: 1; }
+            }
+            @keyframes slideOut {
+                from { transform: translateX(0); opacity: 1; }
+                to { transform: translateX(100%); opacity: 0; }
+            }
+        `;
+        document.head.appendChild(style);
     </script>
 </body>
 

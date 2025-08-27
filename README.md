@@ -1,378 +1,289 @@
-# Chat Widget CDN 🚀
+# 🚀 Enhanced Chat Widget CDN
 
-A powerful, easy-to-integrate customer support chat widget that can be embedded into any website with just a few lines of code. Built with Socket.IO for real-time communication and designed for seamless integration with AI and human agent support systems.
+A highly customizable, embeddable chat widget for customer support with extensive UI customization options.
 
 ## ✨ Features
 
-- **Real-time Messaging**: Instant communication using Socket.IO
-- **Session Persistence**: Maintains chat sessions across page refreshes
-- **AI & Human Agent Support**: Seamless handoff between AI and human agents
-- **Mobile Responsive**: Perfect experience on all devices
-- **Customizable Themes**: Light and dark themes included
-- **Zero Dependencies**: Only requires Socket.IO
-- **Easy Integration**: Just 3 lines of code to set up
-- **Auto-scroll**: Smart scrolling that doesn't interrupt reading
-- **Typing Indicators**: Shows when agents are typing
-- **Message Receipts**: Track message delivery and read status
-- **Error Handling**: Robust error handling and retry mechanisms
-- **Accessibility**: Full keyboard navigation and screen reader support
+- **Real-time Chat** - Instant messaging with Socket.IO
+- **AI & Human Agents** - Seamless handoff between AI and human support
+- **Mobile Responsive** - Works perfectly on all devices
+- **Customizable Themes** - Light and dark themes available
+- **Zero Dependencies** - Only requires Socket.IO
+- **Easy Integration** - Just 3 lines of code to set up
+- **🎨 Extensive UI Customization** - Colors, icons, positioning, text, and more!
 
-## 🚀 Quick Start
+## 🎨 New UI Customization Options
+
+### Colors
+
+Customize every aspect of the widget's color scheme:
+
+```javascript
+colors: {
+    primary: '#667eea',        // Main brand color
+    secondary: '#764ba2',      // Secondary brand color
+    accent: '#ff6b6b',         // Accent/highlight color
+    success: '#51cf66',        // Success states
+    warning: '#ffd43b',        // Warning states
+    error: '#ff4444',          // Error states
+    background: '#ffffff',      // Widget background
+    surface: '#f8f9fa',        // Secondary surfaces
+    text: '#333333',           // Primary text
+    textSecondary: '#666666',  // Secondary text
+    border: '#e9ecef',         // Borders
+    shadow: 'rgba(0,0,0,0.12)' // Shadows
+}
+```
+
+### Floating Button Customization
+
+Customize the appearance and behavior of the floating chat button:
+
+```javascript
+button: {
+    size: 60,                    // Width and height in pixels
+    shape: 'circle',            // 'circle', 'rounded', 'square'
+    icon: 'default',            // 'default', 'message', 'chat', 'support', 'help', 'custom'
+    customIcon: null,           // SVG string for custom icon
+    backgroundColor: null,       // Override default gradient
+    hoverEffect: 'scale',       // 'scale', 'glow', 'bounce', 'none'
+    showNotification: false,    // Show notification indicator
+    notificationColor: '#ff4444' // Notification color
+}
+```
+
+### Position and Layout
+
+Position the widget anywhere on the page with custom offsets:
+
+```javascript
+position: {
+    corner: 'bottom-right',     // 'bottom-right', 'bottom-left', 'top-right', 'top-left'
+    offset: { x: 20, y: 20 },  // Custom offset from corner
+    zIndex: 9999                // Z-index for layering
+}
+```
+
+### Widget Dimensions
+
+Customize the size of the chat widget:
+
+```javascript
+dimensions: {
+    width: 350,                 // Widget width
+    height: 500,                // Widget height
+    minWidth: 300,              // Minimum width
+    maxWidth: 500,              // Maximum width
+    minHeight: 400,             // Minimum height
+    maxHeight: 600              // Maximum height
+}
+```
+
+### Typography
+
+Customize fonts, sizes, and line heights:
+
+```javascript
+typography: {
+    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+    fontSize: 14,               // Base font size
+    headerFontSize: 16,         // Header font size
+    titleFontSize: 18,          // Title font size
+    buttonFontSize: 14,         // Button font size
+    lineHeight: 1.4             // Line height
+}
+```
+
+### Text Content
+
+Customize all text content throughout the widget:
+
+```javascript
+text: {
+    companyName: 'Support',
+    welcomeMessage: 'Hello! How can we help you today?',
+    buttonText: 'Chat with us',
+    connectingText: 'Connecting to chat service...',
+    startChatText: 'Please provide your details to start chatting:',
+    nameLabel: 'Name *',
+    phoneLabel: 'Phone *',
+    emailLabel: 'Email',
+    startChatButton: 'Start Chat',
+    minimizeButton: 'Minimize',
+    closeButton: 'Close',
+    sendButton: 'Send',
+    typingText: 'Agent is typing...',
+    placeholderText: 'Type your message...',
+    noMessagesText: 'No messages yet. Start the conversation!'
+}
+```
+
+### Animations and Effects
+
+Customize entrance animations and hover effects:
+
+```javascript
+animations: {
+    entrance: 'slide-up',       // 'slide-up', 'slide-down', 'fade-in', 'bounce-in', 'none'
+    duration: 300,              // Animation duration in milliseconds
+    easing: 'ease-out',         // CSS easing function
+    hoverEffects: true,         // Enable hover effects
+    typingIndicator: true       // Show typing indicator
+}
+```
+
+### Borders and Shadows
+
+Customize borders and shadow effects:
+
+```javascript
+styling: {
+    borderRadius: 12,           // Border radius
+    borderWidth: 0,             // Border width
+    borderColor: 'transparent', // Border color
+    shadow: '0 8px 40px rgba(0,0,0,0.12)',      // Default shadow
+    shadowHover: '0 12px 50px rgba(0,0,0,0.15)' // Hover shadow
+}
+```
+
+## 🚀 Quick Setup
 
 ### Step 1: Include Socket.IO
+
 ```html
 <script src="https://cdn.socket.io/4.7.4/socket.io.min.js"></script>
 ```
 
 ### Step 2: Include Chat Widget Files
+
 ```html
-<link rel="stylesheet" href="https://your-cdn.com/chat-widget.css">
+<link rel="stylesheet" href="https://your-cdn.com/chat-widget.css" />
 <script src="https://your-cdn.com/chat-widget.js"></script>
 ```
 
-### Step 3: Initialize the Widget
+### Step 3: Initialize with Customization
+
 ```html
 <script>
   ChatWidget.init({
-    serverUrl: 'http://your-backend-url',
-    companyName: 'Your Company',
-    welcomeMessage: 'Hello! How can we help you today?'
+    serverUrl: "http://your-backend-url",
+
+    // Basic configuration
+    theme: "default",
+    autoOpen: false,
+
+    // Enhanced UI customization
+    colors: {
+      primary: "#667eea",
+      secondary: "#764ba2",
+      accent: "#ff6b6b",
+    },
+
+    button: {
+      size: 70,
+      shape: "rounded",
+      icon: "support",
+      hoverEffect: "glow",
+    },
+
+    position: {
+      corner: "top-right",
+      offset: { x: 30, y: 30 },
+    },
+
+    text: {
+      companyName: "My Company",
+      welcomeMessage: "Hi there! How can we help?",
+      buttonText: "Need help?",
+    },
   });
 </script>
 ```
 
-## ⚙️ Configuration Options
+## 🔧 Live Configuration Updates
+
+Update the widget configuration on the fly without reinitializing:
 
 ```javascript
-ChatWidget.init({
-  // Required
-  serverUrl: 'http://your-backend-url',    // Your socket server URL
+// Update colors
+ChatWidget.updateColors({
+  primary: "#ff6b6b",
+  secondary: "#4ecdc4",
+});
 
-  // Appearance
-  position: 'bottom-right',                // 'bottom-right' or 'bottom-left'
-  theme: 'default',                        // 'default' or 'dark'
-  companyName: 'Your Company',             // Company name shown in header
-  
-  // Messages
-  welcomeMessage: 'Hello! How can we help?', // Initial welcome message
-  buttonText: 'Chat with us',              // Tooltip for chat button
-  
-  // Behavior
-  showMinimizeButton: true,                // Show minimize button in header
-  autoOpen: false,                         // Auto-open widget on page load
-  debug: false                             // Enable debug logging
+// Update button style
+ChatWidget.updateButton({
+  shape: "square",
+  hoverEffect: "bounce",
+});
+
+// Update position
+ChatWidget.updatePosition({
+  corner: "top-left",
+  offset: { x: 50, y: 50 },
+});
+
+// Update text content
+ChatWidget.updateText({
+  companyName: "New Company Name",
+  welcomeMessage: "Updated welcome message!",
+});
+
+// Update multiple options at once
+ChatWidget.updateConfig({
+  colors: { primary: "#ff6b6b" },
+  button: { size: 80 },
+  position: { corner: "bottom-left" },
 });
 ```
 
 ## 🎮 API Methods
 
 ```javascript
-// Open the chat widget
+// Open/close the chat widget
 ChatWidget.open();
-
-// Close the chat widget
 ChatWidget.close();
 
-// Get current widget state
+// Get current state
 const state = ChatWidget.getState();
-console.log(state);
-// Returns: { isConnected, isChatStarted, isOpen, messagesCount, session, agentInfo }
 
-// Clear session manually (useful for testing)
-ChatWidget.clearSession();
-
-// Destroy the widget completely
+// Destroy the widget
 ChatWidget.destroy();
+
+// Update configuration
+ChatWidget.updateConfig(options);
+ChatWidget.updateColors(colors);
+ChatWidget.updateButton(buttonConfig);
+ChatWidget.updatePosition(position);
+ChatWidget.updateText(textConfig);
 ```
 
-## 💾 Session Persistence
+## 🎨 Icon Options
 
-The widget automatically saves chat sessions to localStorage and restores them when the page is refreshed or revisited. This provides a seamless experience for users.
+Choose from built-in icons or use custom SVG:
 
-### How It Works
-- **Auto-Save**: Sessions are automatically saved when a chat starts
-- **Auto-Restore**: When the page loads, the widget checks for existing sessions
-- **Session Validation**: Sessions are validated with the server to ensure they're still active
-- **Expiration**: Sessions automatically expire after 24 hours
-- **History Restoration**: Previous messages are restored from the server
+- **default** - Standard chat bubble
+- **message** - Message icon
+- **chat** - Chat conversation icon
+- **support** - Support/checkmark icon
+- **help** - Question mark icon
+- **custom** - Your own SVG string
 
-### Session Events
-Your server should handle these additional events for session management:
+## 📍 Positioning Options
 
-```javascript
-// Customer attempts to resume a session
-socket.on('customer-resume-session', (data) => {
-  // data: { customerId, chatSessionId, customerName }
-  // Validate session and respond with 'session-resumed' or 'session-resume-error'
-});
+- **bottom-right** - Bottom right corner (default)
+- **bottom-left** - Bottom left corner
+- **top-right** - Top right corner
+- **top-left** - Top left corner
 
-// Validate if a session is still active
-socket.on('validate-session', (data) => {
-  // data: { customerId, chatSessionId }
-  // Check if session is valid
-});
+## 🔄 Hover Effects
 
-// Request chat history for resumed session
-socket.on('get-chat-history', (data) => {
-  // data: { chatSessionId }
-  // Respond with 'chat-history' event containing previous messages
-});
-```
+- **scale** - Button scales up on hover
+- **glow** - Button glows with brand color
+- **bounce** - Button bounces on hover
+- **none** - No hover effects
 
-### Server Response Events
-```javascript
-// Session successfully resumed
-socket.emit('session-resumed', {
-  customerId: 'customer-123',
-  chatSessionId: 'session-456',
-  customerName: 'John Doe',
-  status: 'active'
-});
-
-// Session resume failed (expired or invalid)
-socket.emit('session-resume-error', {
-  error: 'Session expired',
-  code: 'SESSION_EXPIRED'
-});
-
-// Chat history for resumed session
-socket.emit('chat-history', {
-  chatSessionId: 'session-456',
-  messages: [
-    {
-      id: 'msg-1',
-      message: 'Hello!',
-      senderType: 'customer',
-      timestamp: '2023-12-01T10:00:00Z'
-    },
-    // ... more messages
-  ]
-});
-```
-
-### Manual Session Management
-```javascript
-// Check if there's an active session
-const state = ChatWidget.getState();
-if (state.session.chatSessionId) {
-  console.log('Active session:', state.session.chatSessionId);
-}
-
-// Clear session manually (e.g., for logout)
-ChatWidget.clearSession();
-```
-
-## 🎨 Themes
-
-The widget comes with two built-in themes:
-
-### Default Theme (Light)
-```javascript
-ChatWidget.init({
-  theme: 'default',
-  // ... other options
-});
-```
-
-### Dark Theme
-```javascript
-ChatWidget.init({
-  theme: 'dark',
-  // ... other options
-});
-```
-
-## 📱 Responsive Design
-
-The widget automatically adapts to different screen sizes:
-- **Desktop**: Fixed position widget (350px × 500px)
-- **Mobile**: Full-screen overlay for optimal mobile experience
-- **Tablet**: Responsive sizing with touch-friendly controls
-
-## 🔧 Complete Integration Example
-
-```html
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Website</title>
-    
-    <!-- Socket.IO -->
-    <script src="https://cdn.socket.io/4.7.4/socket.io.min.js"></script>
-    
-    <!-- Chat Widget -->
-    <link rel="stylesheet" href="https://your-cdn.com/chat-widget.css">
-    <script src="https://your-cdn.com/chat-widget.js"></script>
-</head>
-<body>
-    <h1>Welcome to My Website</h1>
-    <p>Your website content here...</p>
-    
-    <script>
-        // Initialize chat widget
-        ChatWidget.init({
-            serverUrl: 'ws://localhost:3000',
-            companyName: 'My Company Support',
-            welcomeMessage: 'Hi there! How can we help you today?',
-            theme: 'default',
-            position: 'bottom-right',
-            showMinimizeButton: true,
-            autoOpen: false
-        });
-        
-        // Optional: Handle events
-        setTimeout(() => {
-            const state = ChatWidget.getState();
-            if (state.isConnected) {
-                console.log('Chat widget connected successfully');
-            }
-        }, 1000);
-    </script>
-</body>
-</html>
-```
-
-## 🔌 Backend Integration
-
-Your Socket.IO server should handle these events:
-
-### Customer Events (Sent by Widget)
-```javascript
-// Customer joins chat
-socket.on('customer-join', (data) => {
-  // data: { name, phone, email }
-  // Respond with 'chat-started' event
-});
-
-// Customer attempts to resume session
-socket.on('customer-resume-session', (data) => {
-  // data: { customerId, chatSessionId, customerName }
-  // Respond with 'session-resumed' or 'session-resume-error'
-});
-
-// Customer sends message
-socket.on('send-message', (data) => {
-  // data: { message, chatId, senderType, source, chatSessionId }
-});
-
-// Customer typing indicator
-socket.on('typing', (data) => {
-  // data: { chatId, isTyping, senderType }
-});
-
-// Customer ends chat
-socket.on('customer-end-chat', (data) => {
-  // data: { chatSessionId }
-});
-
-// Validate session
-socket.on('validate-session', (data) => {
-  // data: { customerId, chatSessionId }
-});
-
-// Get chat history
-socket.on('get-chat-history', (data) => {
-  // data: { chatSessionId }
-});
-
-// Message read receipt
-socket.on('mark-message-as-read', (data) => {
-  // data: { messageId, sessionId }
-});
-```
-
-### Server Events (Sent to Widget)
-```javascript
-// Start chat session
-socket.emit('chat-started', {
-  customerId: 'customer-123',
-  chatSessionId: 'session-456',
-  message: 'Welcome! How can we help you today?'
-});
-
-// Session resumed successfully
-socket.emit('session-resumed', {
-  customerId: 'customer-123',
-  chatSessionId: 'session-456',
-  customerName: 'John Doe',
-  status: 'active'
-});
-
-// Session resume failed
-socket.emit('session-resume-error', {
-  error: 'Session expired',
-  code: 'SESSION_EXPIRED'
-});
-
-// Chat history for resumed session
-socket.emit('chat-history', {
-  chatSessionId: 'session-456',
-  messages: [
-    {
-      id: 'msg-1',
-      message: 'Hello!',
-      senderType: 'customer',
-      timestamp: '2023-12-01T10:00:00Z'
-    }
-    // ... more messages
-  ]
-});
-
-// Send message to customer
-socket.emit('receive-message', {
-  id: 'msg-789',
-  message: 'Hello! I am here to help.',
-  senderType: 'agent', // or 'ai'
-  timestamp: new Date().toISOString()
-});
-
-// Agent assigned to chat
-socket.emit('agent-assigned', {
-  agentName: 'John Doe',
-  agentId: 'agent-123',
-  source: 'web',
-  chatSessionId: 'session-456'
-});
-
-// Agent typing indicator
-socket.emit('agent-typing', {
-  agentId: 'agent-123',
-  isTyping: true,
-  agentName: 'John Doe'
-});
-
-// Chat ended
-socket.emit('chat-ended', {
-  message: 'Chat has ended. Thank you for contacting us!'
-});
-
-// Error handling
-socket.emit('error', { message: 'Connection error' });
-socket.emit('message-error', { originalMessage: 'Failed message' });
-socket.emit('end-chat-error', { message: 'Failed to end chat' });
-```
-
-## 🎯 Event Flow
-
-### New Chat Session
-1. **Widget Initialization**: Widget connects to Socket.IO server
-2. **Customer Join**: Customer fills form and clicks "Start Chat"
-3. **Chat Started**: Server creates session and sends welcome message
-4. **Session Storage**: Widget automatically saves session to localStorage
-5. **Messaging**: Real-time message exchange with typing indicators
-6. **Agent Assignment**: Human agent can join the conversation
-7. **Chat End**: Either party can end the chat session
-
-### Resumed Session
-1. **Widget Initialization**: Widget checks localStorage for existing session
-2. **Session Resume**: Widget attempts to resume stored session with server
-3. **Validation**: Server validates session and responds with success/error
-4. **History Restoration**: If valid, server sends chat history
-5. **Continue Chat**: User can continue from where they left off
-
-## 📋 Browser Support
+## 📱 Browser Support
 
 - Chrome 60+
 - Firefox 55+
@@ -380,123 +291,106 @@ socket.emit('end-chat-error', { message: 'Failed to end chat' });
 - Edge 79+
 - Mobile browsers (iOS Safari, Chrome Mobile)
 
-## 🔒 Security Considerations
+## 🔧 Complete Example
 
-- Always use HTTPS in production
-- Implement proper CORS settings on your server
-- Validate all input data on the server side
-- Use authentication tokens for sensitive operations
-- Rate limit socket connections and messages
-
-## 🎨 Customization
-
-### Custom CSS
-You can override the default styles by adding custom CSS after the widget CSS:
-
-```css
-/* Custom theme colors */
-.chat-widget-container .chat-header {
-    background: linear-gradient(135deg, #your-color1, #your-color2);
-}
-
-.chat-widget-container .chat-send-btn {
-    background: #your-brand-color;
-}
-```
-
-### Custom Positioning
-```javascript
-// Custom positioning using CSS
-ChatWidget.init({
-    position: 'bottom-right', // Start with default
-    // ... other options
-});
-
-// Then add custom CSS
-document.querySelector('.chat-widget-container').style.bottom = '30px';
-document.querySelector('.chat-widget-container').style.right = '30px';
-```
-
-## 🐛 Troubleshooting
-
-### Common Issues
-
-1. **Widget not appearing**
-   - Check that Socket.IO is loaded before the widget script
-   - Verify the CSS file is properly linked
-   - Check browser console for errors
-
-2. **Connection issues**
-   - Verify the `serverUrl` is correct and accessible
-   - Check CORS settings on your server
-   - Ensure Socket.IO server is running
-
-3. **Styling issues**
-   - Make sure CSS file is loaded after other stylesheets
-   - Check for CSS conflicts with your site's styles
-   - Verify viewport meta tag is present
-
-### Debug Mode
-Enable debug mode to see detailed logs:
-
-```javascript
-ChatWidget.init({
-    debug: true,
-    // ... other options
-});
-```
-
-## 📦 File Structure
-
-```
-cdn/
-├── chat-widget.js          # Full development version
-├── chat-widget.min.js      # Minified production version
-├── chat-widget.css         # Complete stylesheet
-└── index.html             # Demo and documentation
-```
-
-## 🚀 Production Deployment
-
-### Using CDN (Recommended)
 ```html
-<!-- Production files from your CDN -->
-<link rel="stylesheet" href="https://your-cdn.com/chat-widget.css">
-<script src="https://your-cdn.com/chat-widget.min.js"></script>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>My Website</title>
+    
+    <!-- Socket.IO -->
+    <script src="https://cdn.socket.io/4.7.4/socket.io.min.js"></script>
+    
+    <!-- Chat Widget -->
+    <link rel="stylesheet" href="https://your-cdn.com/chat-widget.css" />
+    <script src="https://your-cdn.com/chat-widget.js"></script>
+</head>
+<body>
+    <h1>Welcome to My Website</h1>
+    <p>Your website content here...</p>
+    
+    <script>
+      // Initialize chat widget with full customization
+        ChatWidget.init({
+        serverUrl: "ws://localhost:3000",
+
+        // Enhanced UI customization
+        colors: {
+          primary: "#667eea",
+          secondary: "#764ba2",
+          accent: "#ff6b6b",
+          background: "#ffffff",
+          text: "#333333",
+        },
+
+        button: {
+          size: 70,
+          shape: "rounded",
+          icon: "support",
+          hoverEffect: "glow",
+          showNotification: true,
+        },
+
+        position: {
+          corner: "bottom-right",
+          offset: { x: 25, y: 25 },
+        },
+
+        dimensions: {
+          width: 380,
+          height: 550,
+        },
+
+        text: {
+          companyName: "My Company Support",
+          welcomeMessage: "Hi there! How can we help you today?",
+          buttonText: "Need help? Chat with us!",
+        },
+
+        animations: {
+          entrance: "bounce-in",
+          duration: 400,
+        },
+      });
+    </script>
+</body>
+</html>
 ```
 
-### Self-Hosted
-1. Upload files to your web server
-2. Update file paths in your HTML
-3. Ensure proper MIME types are set
+## 🎯 Use Cases
 
-### Performance Optimization
-- Use the minified version (`chat-widget.min.js`) in production
-- Enable gzip compression for all files
-- Set proper cache headers for static assets
-- Consider using a CDN for global distribution
+- **Brand Consistency** - Match your website's color scheme and typography
+- **Custom Positioning** - Place the widget where it fits best in your layout
+- **Localization** - Customize all text content for different languages
+- **A/B Testing** - Easily test different button styles and positions
+- **Seasonal Themes** - Update colors and styles for holidays or campaigns
+- **Accessibility** - Adjust sizes and colors for better usability
+
+## 🔄 Migration from v1
+
+If you're upgrading from the previous version, update your configuration:
+
+```javascript
+// Old way
+ChatWidget.init({
+  position: "bottom-right",
+  companyName: "Support",
+});
+
+// New way
+ChatWidget.init({
+  position: { corner: "bottom-right", offset: { x: 20, y: 20 } },
+  text: { companyName: "Support" },
+});
+```
 
 ## 📄 License
 
-This project is available for use in both personal and commercial projects. Please ensure you comply with Socket.IO's licensing terms as well.
+MIT License - feel free to use in your projects!
 
 ## 🤝 Contributing
 
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Test thoroughly
-5. Submit a pull request
-
-## 📞 Support
-
-For technical support or questions:
-- Check the troubleshooting section above
-- Review browser console for error messages
-- Ensure your Socket.IO server implements the required events
-
----
-
-**Made with ❤️ for better customer support experiences**
-#   a g a m i s o f t - e r p - c h a t b o t - c d n - t e s t - f r o n t  
- 
+Contributions are welcome! Please feel free to submit a Pull Request.
