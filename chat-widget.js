@@ -810,6 +810,12 @@
           self.handleAgentAssigned(data);
         });
 
+        // Typing indicator events - Following documentation
+        this.socket.on("user-typing", function (data) {
+          self.handleUserTyping(data);
+        });
+
+        // Legacy support for backward compatibility
         this.socket.on("agent-typing", function (data) {
           self.handleAgentTyping(data);
         });
@@ -975,9 +981,31 @@
     },
 
     /**
-     * Handle agent typing
+     * Handle user typing event - Following documentation exactly
+     */
+    handleUserTyping: function (data) {
+      this.log('User typing event received:', data);
+      
+      const { sessionId, senderId, sender_type, isTyping } = data;
+      
+      // Only show typing indicator for agents (sender_type = 1) in our session
+      if (sessionId === this.state.session.chatSessionId && sender_type === 1) {
+        this.state.agentTyping = isTyping;
+        this.updateTypingIndicator();
+        
+        if (isTyping) {
+          this.log(`Agent ${senderId} is typing in session ${sessionId}`);
+        } else {
+          this.log(`Agent ${senderId} stopped typing in session ${sessionId}`);
+        }
+      }
+    },
+
+    /**
+     * Handle agent typing (legacy support)
      */
     handleAgentTyping: function (data) {
+      this.log('Agent typing (legacy):', data);
       this.state.agentTyping = data.isTyping;
       this.updateTypingIndicator();
     },
@@ -1200,14 +1228,14 @@
 
       if (!this.state.session.chatSessionId) return;
 
-      // Start typing if not already
+      // Start typing if not already (using new event format)
       if (!this.state.isTyping && message) {
         this.state.isTyping = true;
-        this.socket.emit("typing", {
-          chatId: this.state.session.chatSessionId,
-          isTyping: true,
+        this.socket.emit("typing-start", {
+          sessionId: this.state.session.chatSessionId,
           sender_type: 2,
         });
+        this.log('Typing start emitted for session:', this.state.session.chatSessionId);
       }
 
       // Reset typing timeout
@@ -1224,11 +1252,11 @@
       if (this.state.isTyping) {
         this.state.isTyping = false;
         if (this.state.session.chatSessionId) {
-          this.socket.emit("typing", {
-            chatId: this.state.session.chatSessionId,
-            isTyping: false,
+          this.socket.emit("typing-stop", {
+            sessionId: this.state.session.chatSessionId,
             sender_type: 2,
           });
+          this.log('Typing stop emitted for session:', this.state.session.chatSessionId);
         }
       }
       clearTimeout(this.typingTimeout);
@@ -1318,7 +1346,7 @@
     },
 
     /**
-     * Update typing indicator
+     * Update typing indicator display
      */
     updateTypingIndicator: function () {
       const typingEl = this.elements.container.querySelector(
@@ -1326,6 +1354,11 @@
       );
 
       if (this.state.agentTyping) {
+        const agentName = this.state.agentInfo?.name || 'Agent';
+        const typingText = typingEl.querySelector('.typing-text');
+        if (typingText) {
+          typingText.textContent = `${agentName} is typing...`;
+        }
         typingEl.style.display = "flex";
         this.autoScrollToBottom();
       } else {
