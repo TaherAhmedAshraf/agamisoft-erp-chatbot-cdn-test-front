@@ -229,9 +229,19 @@
                     <p>Light and dark themes available</p>
                 </div>
                 <div class="feature-card">
+                    <div class="feature-icon">📁</div>
+                    <h3>File Attachments</h3>
+                    <p>Upload and share files during conversations</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🖼️</div>
+                    <h3>Image Previews</h3>
+                    <p>Images display as previews, files as downloadable attachments</p>
+                </div>
+                <div class="feature-card">
                     <div class="feature-icon">⚡</div>
                     <h3>Zero Dependencies</h3>
-                    <p>Only requires Socket.IO</p>
+                    <p>Only requires Socket.IO and Axios for file uploads</p>
                 </div>
                 <div class="feature-card">
                     <div class="feature-icon">🔧</div>
@@ -245,9 +255,10 @@
             <h2>🚀 Quick Setup</h2>
             <p>Add the chat widget to your website in just 3 simple steps:</p>
 
-            <h3>Step 1: Include Socket.IO</h3>
+            <h3>Step 1: Include Required Libraries</h3>
             <div class="code-block">
                 &lt;script src="https://cdn.socket.io/4.7.4/socket.io.min.js"&gt;&lt;/script&gt;
+                &lt;script src="https://cdn.jsdelivr.net/npm/axios@1.6.0/dist/axios.min.js"&gt;&lt;/script&gt;
             </div>
 
             <h3>Step 2: Include Chat Widget Files</h3>
@@ -305,6 +316,29 @@
                     width: 350,
                     height: 500
                 },
+                
+                // File Upload Configuration
+                fileUpload: {
+                    enabled: true,
+                    apiEndpoint: '/api/private/storage/upload',
+                    accessEndpoint: '/api/private/storage', // Base endpoint for file access
+                    maxFileSize: 10 * 1024 * 1024, // 10MB
+                    allowedTypes: ['image/*', 'application/pdf', '.doc', '.docx', '.txt'],
+                    multiple: true,
+                    maxFiles: 5
+                },
+                
+                // Note: Files are sent in this format:
+                // {
+                //   message: string,
+                //   chatId: string,
+                //   sender_type: 2,
+                //   source: 'web',
+                //   files: [{ fileName: string, uri: string }]
+                // }
+                
+                // Image files automatically display as previews
+                // Non-image files show as downloadable attachments
                 
                 text: {
                     companyName: 'Your Company',
@@ -449,6 +483,9 @@
 
                 &lt;!-- Socket.IO --&gt;
                 &lt;script src="https://cdn.socket.io/4.7.4/socket.io.min.js"&gt;&lt;/script&gt;
+                
+                &lt;!-- Axios for file uploads --&gt;
+                &lt;script src="https://cdn.jsdelivr.net/npm/axios@1.6.0/dist/axios.min.js"&gt;&lt;/script&gt;
 
                 &lt;!-- Chat Widget --&gt;
                 &lt;link rel="stylesheet" href="https://your-cdn.com/chat-widget.css"&gt;
@@ -481,6 +518,9 @@
 
     <!-- Socket.IO CDN -->
     <script src="https://cdn.socket.io/4.7.4/socket.io.min.js"></script>
+    
+    <!-- Axios CDN for file uploads -->
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 
     <!-- Chat Widget -->
     <script src="chat-widget.js"></script>

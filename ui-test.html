@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat Widget UI Test</title>
+    
+    <!-- Chat Widget CSS -->
+    <link rel="stylesheet" href="chat-widget.css">
+    
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #f0f0f0;
+            margin: 0;
+        }
+        .test-info {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .test-button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-info">
+        <h1>🎨 Chat Widget UI Test</h1>
+        <p>This page tests the UI fixes for the chat widget, specifically the input field positioning and file attachment functionality.</p>
+        
+        <h3>Expected UI Improvements:</h3>
+        <ul>
+            <li>✅ Input field stays fixed at bottom of chat widget</li>
+            <li>✅ Input field doesn't overflow or get cut off</li>
+            <li>✅ Attachment button positioned correctly inside input field</li>
+            <li>✅ File preview area appears above input when files are selected</li>
+            <li>✅ Proper scrolling in message area</li>
+            <li>✅ Responsive design works on mobile</li>
+        </ul>
+        
+        <button class="test-button" onclick="testWidget()">Initialize Chat Widget</button>
+        <button class="test-button" onclick="openWidget()">Open Widget</button>
+        <button class="test-button" onclick="addTestMessages()">Add Test Messages</button>
+    </div>
+
+    <!-- Socket.IO CDN -->
+    <script src="https://cdn.socket.io/4.7.4/socket.io.min.js"></script>
+    
+    <!-- Chat Widget -->
+    <script src="chat-widget.js"></script>
+
+    <script>
+        let widgetInitialized = false;
+        
+        function testWidget() {
+            if (widgetInitialized) {
+                alert('Widget already initialized!');
+                return;
+            }
+            
+            ChatWidget.init({
+                serverUrl: 'ws://localhost:3000',
+                companyName: 'UI Test',
+                welcomeMessage: 'Testing the improved UI! The input should stay at the bottom and not overflow.',
+                theme: 'default',
+                position: { corner: 'bottom-right', offset: { x: 20, y: 20 } },
+                debug: true,
+                autoOpen: false
+            });
+            
+            widgetInitialized = true;
+            alert('Widget initialized! Click "Open Widget" to test the UI.');
+        }
+        
+        function openWidget() {
+            if (!widgetInitialized) {
+                alert('Please initialize the widget first!');
+                return;
+            }
+            ChatWidget.open();
+        }
+        
+        function addTestMessages() {
+            if (!widgetInitialized) {
+                alert('Please initialize the widget first!');
+                return;
+            }
+            
+            // Add several test messages to test scrolling
+            const messages = [
+                'Hello! This is a test message.',
+                'This is another message to test scrolling behavior.',
+                'The input field should stay fixed at the bottom.',
+                'Even with many messages, the input should not overflow.',
+                'You can test file attachments using the paperclip button.',
+                'The chat area should scroll properly.',
+                'Long messages should wrap correctly and not break the layout. This is a very long message to test how the chat widget handles text wrapping and whether it affects the input positioning.',
+                'Short message.',
+                'Another test message.',
+                'The last test message to ensure scrolling works well.'
+            ];
+            
+            const messagesContainer = document.querySelector('.chat-messages');
+            if (messagesContainer) {
+                messages.forEach((text, index) => {
+                    const messageDiv = document.createElement('div');
+                    messageDiv.className = 'chat-message user-message';
+                    messageDiv.innerHTML = `
+                        <div class="message-content">
+                            <p>${text}</p>
+                        </div>
+                        <div class="message-time">${new Date().toLocaleTimeString()}</div>
+                    `;
+                    messagesContainer.appendChild(messageDiv);
+                });
+                
+                // Scroll to bottom
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+                alert('Test messages added! Check if the input field stays at the bottom and scrolling works.');
+            } else {
+                alert('Please open the widget first!');
+            }
+        }
+        
+        // Auto-initialize for quick testing
+        setTimeout(() => {
+            if (typeof ChatWidget !== 'undefined') {
+                testWidget();
+                setTimeout(() => {
+                    openWidget();
+                }, 500);
+            }
+        }, 1000);
+    </script>
+</body>
+</html>

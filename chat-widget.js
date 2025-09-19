@@ -132,6 +132,26 @@
         shadow: "0 8px 40px rgba(0, 0, 0, 0.12)",
         shadowHover: "0 12px 50px rgba(0, 0, 0, 0.15)",
       },
+
+      // File Upload Configuration
+      fileUpload: {
+        enabled: true,
+        apiEndpoint: 'http://localhost:3000/api/private/storage/upload', // Changed to relative URL
+        accessEndpoint: 'http://localhost:3000/api/private/storage', // Base endpoint for file access
+        maxFileSize: 10 * 1024 * 1024, // 10MB in bytes
+        allowedTypes: [
+          'image/jpeg', 'image/png', 'image/gif', 'image/webp',
+          'application/pdf', 'application/msword', 
+          'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+          'text/plain', 'text/csv'
+        ],
+        allowedExtensions: ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.pdf', '.doc', '.docx', '.txt', '.csv'],
+        multiple: false,
+        maxFiles: 1,
+        // Fallback options for testing
+        useMockUpload: false, // Set to true for testing without server
+        mockDelay: 1000 // Mock upload delay in ms
+      },
     },
 
     // State
@@ -153,6 +173,8 @@
         phone: "",
         email: "",
       },
+      attachedFiles: [],
+      uploadingFiles: new Map(),
     },
 
     // Socket reference
@@ -191,6 +213,11 @@
       }
 
       this.log("Initializing ChatWidget...");
+
+      // Initialize axios for file uploads if enabled
+      if (this.config.fileUpload.enabled) {
+        this.initAxios();
+      }
 
       // Create widget elements
       this.createWidget();
@@ -236,9 +263,20 @@
         this.elements.container.querySelector(".chat-input-form");
       this.elements.startForm =
         this.elements.container.querySelector(".chat-start-form");
+      this.elements.fileInput =
+        this.elements.container.querySelector(".chat-file-input");
+      this.elements.attachmentBtn =
+        this.elements.container.querySelector(".chat-attachment-btn");
+      this.elements.filePreview =
+        this.elements.container.querySelector(".chat-file-preview");
 
       // Apply custom styling
       this.applyCustomStyling();
+
+      // Hide attachment button if file upload is disabled
+      if (!this.config.fileUpload.enabled && this.elements.attachmentBtn) {
+        this.elements.attachmentBtn.style.display = 'none';
+      }
 
       // Bind events
       this.bindEvents();
@@ -347,10 +385,21 @@
 
                     <!-- Chat Input - Fixed to bottom -->
                     <div class="chat-input-container" style="display: none;">
+                        <!-- File preview area -->
+                        <div class="chat-file-preview" style="display: none;"></div>
+                        
                         <form class="chat-input-form">
-                            <input type="text" class="chat-input" placeholder="${
-                              this.config.text.placeholderText
-                            }" maxlength="1000">
+                            <div class="chat-input-wrapper">
+                                <input type="text" class="chat-input" placeholder="${
+                                  this.config.text.placeholderText
+                                }" maxlength="1000">
+                                <input type="file" class="chat-file-input" accept="image/*,application/pdf,.doc,.docx,.txt" style="display: none;" multiple>
+                                <button type="button" class="chat-attachment-btn" title="Attach files">
+                                    <svg viewBox="0 0 24 24" width="20" height="20">
+                                        <path d="M16.5 6v11.5c0 2.21-1.79 4-4 4s-4-1.79-4-4V5c0-1.38 1.12-2.5 2.5-2.5s2.5 1.12 2.5 2.5v10.5c0 .55-.45 1-1 1s-1-.45-1-1V6H10v9.5c0 1.38 1.12 2.5 2.5 2.5s2.5-1.12 2.5-2.5V5c0-2.21-1.79-4-4-4S7 2.79 7 5v12.5c0 3.04 2.46 5.5 5.5 5.5s5.5-2.46 5.5-5.5V6h-1.5z"/>
+                                    </svg>
+                                </button>
+                            </div>
                             <button type="submit" class="chat-send-btn" disabled>
                                 <svg viewBox="0 0 24 24" width="20" height="20">
                                     <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
@@ -714,6 +763,26 @@
         });
       }
 
+      // File attachment events
+      if (this.elements.attachmentBtn && this.elements.fileInput) {
+        this.log('File upload elements found, binding events...');
+        
+        this.elements.attachmentBtn.addEventListener("click", function () {
+          self.log('Attachment button clicked');
+          self.elements.fileInput.click();
+        });
+
+        this.elements.fileInput.addEventListener("change", function (e) {
+          self.log('File input changed, files selected:', e.target.files.length);
+          self.handleFileSelection(e);
+        });
+      } else {
+        this.log('WARNING: File upload elements not found', {
+          attachmentBtn: !!this.elements.attachmentBtn,
+          fileInput: !!this.elements.fileInput
+        });
+      }
+
       // Click outside to close (optional)
       document.addEventListener("click", function (e) {
         if (!self.elements.container.contains(e.target) && self.state.isOpen) {
@@ -936,6 +1005,9 @@
         message: message.message,
         sender_type: message.sender_type,
         timestamp: new Date(message.timestamp || Date.now()),
+        files: message.files,
+        // For backward compatibility
+        attachments: message.attachments
       });
 
       // Mark as read
@@ -1129,6 +1201,9 @@
             message: msg.message,
             sender_type: msg.sender_type,
             timestamp: new Date(msg.timestamp || msg.createdAt),
+            files: msg.files,
+            // For backward compatibility
+            attachments: msg.attachments
           });
         });
       }
@@ -1188,11 +1263,29 @@
      */
     handleSendMessage: function (e) {
       const message = this.elements.input.value.trim();
+      const hasFiles = this.state.attachedFiles.length > 0;
 
-      if (!message || !this.state.session.chatSessionId) {
+      if (!message && !hasFiles) {
         return;
       }
 
+      if (!this.state.session.chatSessionId) {
+        this.showErrorMessage("Chat session not available");
+        return;
+      }
+
+      // If there are files, upload them first
+      if (hasFiles) {
+        this.sendMessageWithFiles(message);
+      } else {
+        this.sendTextMessage(message);
+      }
+    },
+
+    /**
+     * Send text-only message
+     */
+    sendTextMessage: function(message) {
       const messageData = {
         message: message,
         chatId: this.state.session.chatSessionId,
@@ -1217,6 +1310,102 @@
       this.elements.input.value = "";
       this.updateSendButton();
       this.stopTyping();
+    },
+
+    /**
+     * Send message with files
+     */
+    sendMessageWithFiles: async function(message) {
+      try {
+        this.log('Starting sendMessageWithFiles process...');
+        this.log('Attached files count:', this.state.attachedFiles.length);
+        
+        // Show uploading indicator
+        this.addMessage({
+          id: "uploading-" + Date.now(),
+          message: message || "Uploading files...",
+          sender_type: 2,
+          senderId: this.state.session.customerId,
+          timestamp: new Date(),
+          isPending: true,
+          isUploading: true,
+        });
+
+        // Upload all files
+        this.log('Starting file upload process...');
+        const uploadResults = await this.uploadAllFiles();
+        this.log('Upload results:', uploadResults);
+        
+        // Filter successful uploads
+        const successfulUploads = uploadResults.filter(result => result !== null);
+        this.log('Successful uploads count:', successfulUploads.length);
+        
+        if (successfulUploads.length === 0) {
+          this.log('ERROR: All file uploads failed');
+          this.showErrorMessage("All file uploads failed");
+          return;
+        }
+
+        // Check which files are marked as uploaded
+        const uploadedFiles = this.state.attachedFiles.filter(f => f.uploaded);
+        this.log('Files marked as uploaded:', uploadedFiles.length);
+        uploadedFiles.forEach(f => {
+          this.log(`- ${f.file.name}: ${f.uploadUrl}`);
+        });
+
+        // Prepare message with file attachments
+        const messageData = {
+          message: message || "",
+          chatId: this.state.session.chatSessionId,
+          sender_type: 2,
+          source: "web",
+          chatSessionId: this.state.session.chatSessionId,
+          files: this.state.attachedFiles
+            .filter(f => f.uploaded)
+            .map(f => ({
+              fileName: f.file.name,
+              uri: f.uploadUrl
+            }))
+        };
+
+        this.log('Message data to send:', JSON.stringify(messageData, null, 2));
+
+        this.socket.emit("send-message", messageData);
+
+        // Add message to UI
+        this.addMessage({
+          id: "pending-" + Date.now(),
+          message: message || "",
+          sender_type: 2,
+          senderId: this.state.session.customerId,
+          timestamp: new Date(),
+          isPending: true,
+          files: messageData.files,
+          // Store additional metadata for display purposes
+          fileMetadata: this.state.attachedFiles
+            .filter(f => f.uploaded)
+            .map(f => ({
+              fileName: f.file.name,
+              fileSize: f.file.size,
+              fileType: f.file.type,
+              uri: f.uploadUrl
+            }))
+        });
+
+        // Clear input and files
+        this.elements.input.value = "";
+        this.state.attachedFiles = [];
+        this.renderFilePreview();
+        this.updateSendButton();
+        this.stopTyping();
+
+        this.log('Message sent successfully with files');
+
+      } catch (error) {
+        console.error("Error sending message with files:", error);
+        this.log('ERROR in sendMessageWithFiles:', error.message);
+        this.showErrorMessage("Failed to send message with files");
+      }
     },
 
     /**
@@ -1289,7 +1478,7 @@
           : messageData.sender_type === 1
           ? "agent"
           : "customer"
-      } ${messageData.isPending ? "pending" : ""}`;
+      } ${messageData.isPending ? "pending" : ""} ${messageData.isUploading ? "uploading" : ""}`;
       messageEl.dataset.messageId = messageData.id;
 
       if (messageData.sender_type === 0) {
@@ -1299,16 +1488,83 @@
                     )}</div>
                 `;
       } else {
+        let attachmentsHtml = '';
+        // Handle both files and fileMetadata for backward compatibility and display
+        const filesToDisplay = messageData.fileMetadata || messageData.attachments || messageData.files || [];
+        
+        if (filesToDisplay.length > 0) {
+          attachmentsHtml = `
+            <div class="message-attachments">
+              ${filesToDisplay.map(file => {
+                // Handle different file object formats
+                const fileName = file.fileName || file.name;
+                const fileSize = file.fileSize || file.size;
+                const fileType = file.fileType || file.type || 'application/octet-stream';
+                const fileUri = file.uri || file.fileUrl || file.url;
+                
+                // Get the actual access URL for the file
+                const fileAccessUrl = fileUri ? this.getFileAccessUrl(this.extractFileName(fileUri)) : null;
+                
+                // Check if it's an image and should show preview
+                const isImage = fileType && fileType.startsWith('image/');
+                
+                if (isImage && fileAccessUrl) {
+                  // Render image preview
+                  return `
+                    <div class="message-attachment image-attachment">
+                      <div class="attachment-image-preview">
+                        <img src="${fileAccessUrl}" alt="${this.escapeHtml(fileName)}" class="attachment-image" loading="lazy" crossorigin="anonymous" />
+                      </div>
+                      <div class="attachment-info">
+                        <div class="attachment-name">${this.escapeHtml(fileName)}</div>
+                        ${fileSize ? `<div class="attachment-size">${this.formatFileSize(fileSize)}</div>` : ''}
+                      </div>
+                      ${fileAccessUrl ? `
+                        <a href="${fileAccessUrl}" target="_blank" class="attachment-download" title="View full size">
+                          <svg viewBox="0 0 24 24" width="16" height="16">
+                            <path d="M12,9A3,3 0 0,0 9,12A3,3 0 0,0 12,15A3,3 0 0,0 15,12A3,3 0 0,0 12,9M12,17A5,5 0 0,1 7,12A5,5 0 0,1 12,7A5,5 0 0,1 17,12A5,5 0 0,1 12,17M12,4.5C7,4.5 2.73,7.61 1,12C2.73,16.39 7,19.5 12,19.5C17,19.5 21.27,16.39 23,12C21.27,7.61 17,4.5 12,4.5Z"/>
+                          </svg>
+                        </a>
+                      ` : ''}
+                    </div>
+                  `;
+                } else {
+                  // Render regular file attachment
+                  return `
+                    <div class="message-attachment">
+                      <div class="attachment-icon">
+                        ${this.getFileIcon(fileType)}
+                      </div>
+                      <div class="attachment-info">
+                        <div class="attachment-name">${this.escapeHtml(fileName)}</div>
+                        ${fileSize ? `<div class="attachment-size">${this.formatFileSize(fileSize)}</div>` : ''}
+                      </div>
+                      ${fileAccessUrl ? `
+                        <a href="${fileAccessUrl}" target="_blank" class="attachment-download" title="Download ${this.escapeHtml(fileName)}">
+                          <svg viewBox="0 0 24 24" width="16" height="16">
+                            <path d="M5,20H19V18H5M19,9H15V3H9V9H5L12,16L19,9Z"/>
+                          </svg>
+                        </a>
+                      ` : ''}
+                    </div>
+                  `;
+                }
+              }).join('')}
+            </div>
+          `;
+        }
+
         messageEl.innerHTML = `
-                    <div class="message-content">${this.escapeHtml(
-                      messageData.message
-                    )}</div>
+                    ${messageData.message ? `<div class="message-content">${this.escapeHtml(messageData.message)}</div>` : ''}
+                    ${attachmentsHtml}
                     <div class="message-time">${this.formatTime(
                       messageData.timestamp
                     )}</div>
                     ${
                       messageData.isPending
                         ? '<div class="message-status">Sending...</div>'
+                        : messageData.isUploading
+                        ? '<div class="message-status">Uploading files...</div>'
                         : ""
                     }
                 `;
@@ -1372,8 +1628,9 @@
     updateSendButton: function () {
       const sendBtn = this.elements.container.querySelector(".chat-send-btn");
       const hasText = this.elements.input.value.trim().length > 0;
+      const hasFiles = this.state.attachedFiles.length > 0;
 
-      sendBtn.disabled = !hasText || !this.state.isChatStarted;
+      sendBtn.disabled = (!hasText && !hasFiles) || !this.state.isChatStarted;
     },
 
     /**
@@ -1424,6 +1681,8 @@
       this.state.session = { customerId: null, chatSessionId: null };
       this.state.agentInfo = null;
       this.state.agentTyping = false;
+      this.state.attachedFiles = [];
+      this.state.uploadingFiles.clear();
 
       // Clear stored session
       this.clearStoredSession();
@@ -1444,6 +1703,9 @@
         ? "Connected"
         : "Disconnected";
       this.elements.messages.innerHTML = "";
+
+      // Reset file preview
+      this.renderFilePreview();
 
       // Reset form
       if (this.elements.startForm) {
@@ -1713,6 +1975,20 @@
       this.resetChatState();
     },
 
+    // Global method for removing files (called from onclick)
+    removeFile: function(fileId) {
+      // Remove from attached files
+      this.state.attachedFiles = this.state.attachedFiles.filter(f => f.id !== fileId);
+      
+      // Cancel upload if in progress
+      if (this.state.uploadingFiles.has(fileId)) {
+        this.state.uploadingFiles.delete(fileId);
+      }
+
+      this.renderFilePreview();
+      this.updateSendButton();
+    },
+
     /**
      * Update configuration on the fly
      */
@@ -1839,6 +2115,461 @@
       const placeholder = this.elements.container.querySelector(".chat-input");
       if (placeholder)
         placeholder.placeholder = this.config.text.placeholderText;
+    },
+
+    /**
+     * File Upload Methods
+     */
+    
+    /**
+     * Initialize axios instance for file uploads
+     */
+    initAxios: function() {
+      if (typeof axios === 'undefined') {
+        console.warn('ChatWidget: Axios library not found. File upload functionality disabled.');
+        return false;
+      }
+
+      this.axiosInstance2 = axios.create({
+        
+        baseURL: this.config.serverUrl,
+        timeout: 30000, // 30 seconds for file uploads
+        withCredentials: true,
+      });
+
+      return true;
+    },
+
+    /**
+     * Handle file selection
+     */
+    handleFileSelection: function(event) {
+      this.log('handleFileSelection called');
+      
+      if (!this.config.fileUpload.enabled) {
+        this.log('ERROR: File upload is disabled');
+        this.showErrorMessage('File upload is disabled');
+        return;
+      }
+
+      const files = Array.from(event.target.files);
+      this.log(`Files selected: ${files.length}`);
+      
+      if (files.length === 0) {
+        this.log('No files selected');
+        return;
+      }
+
+      // Validate files
+      const validFiles = [];
+      for (const file of files) {
+        const validationResult = this.validateFile(file);
+        if (validationResult.valid) {
+          validFiles.push(file);
+        } else {
+          this.showErrorMessage(validationResult.error);
+        }
+      }
+
+      if (validFiles.length > 0) {
+        // Check total file limit
+        const currentFiles = this.state.attachedFiles.length;
+        const newFilesCount = validFiles.length;
+        if (currentFiles + newFilesCount > this.config.fileUpload.maxFiles) {
+          this.showErrorMessage(`Maximum ${this.config.fileUpload.maxFiles} files allowed`);
+          return;
+        }
+
+        // Add to attached files and show preview
+        validFiles.forEach(file => {
+          this.addFileToPreview(file);
+        });
+      }
+
+      // Clear input for reuse
+      event.target.value = '';
+    },
+
+    /**
+     * Validate file before upload
+     */
+    validateFile: function(file) {
+      // Check file size
+      if (file.size > this.config.fileUpload.maxFileSize) {
+        return {
+          valid: false,
+          error: `File "${file.name}" is too large. Maximum size is ${this.formatFileSize(this.config.fileUpload.maxFileSize)}`
+        };
+      }
+
+      // Check file type
+      const fileExtension = '.' + file.name.split('.').pop().toLowerCase();
+      const isValidType = this.config.fileUpload.allowedTypes.includes(file.type) ||
+                         this.config.fileUpload.allowedExtensions.includes(fileExtension);
+
+      if (!isValidType) {
+        return {
+          valid: false,
+          error: `File type "${fileExtension}" is not supported`
+        };
+      }
+
+      return { valid: true };
+    },
+
+    /**
+     * Add file to preview area
+     */
+    addFileToPreview: function(file) {
+      this.log(`Adding file to preview: ${file.name} (${file.type}, ${file.size} bytes)`);
+      
+      const fileId = 'file_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+      
+      const fileData = {
+        id: fileId,
+        file: file,
+        uploaded: false,
+        uploadUrl: null
+      };
+      
+      this.state.attachedFiles.push(fileData);
+      this.log(`File added, total attached files: ${this.state.attachedFiles.length}`);
+
+      this.renderFilePreview();
+      this.updateSendButton();
+    },
+
+    /**
+     * Render file preview
+     */
+    renderFilePreview: function() {
+      if (this.state.attachedFiles.length === 0) {
+        this.elements.filePreview.style.display = 'none';
+        this.elements.filePreview.innerHTML = '';
+        return;
+      }
+
+      this.elements.filePreview.style.display = 'block';
+      this.elements.filePreview.innerHTML = this.state.attachedFiles.map(fileData => {
+        const isUploading = this.state.uploadingFiles.has(fileData.id);
+        const file = fileData.file;
+        
+        return `
+          <div class="file-preview-item" data-file-id="${fileData.id}">
+            <div class="file-icon">
+              ${this.getFileIcon(file.type)}
+            </div>
+            <div class="file-info">
+              <div class="file-name">${this.escapeHtml(file.name)}</div>
+              <div class="file-size">${this.formatFileSize(file.size)}</div>
+              ${isUploading ? '<div class="file-status">Uploading...</div>' : ''}
+            </div>
+            <button type="button" class="file-remove-btn" onclick="ChatWidget.removeFile('${fileData.id}')" ${isUploading ? 'disabled' : ''}>
+              <svg viewBox="0 0 24 24" width="16" height="16">
+                <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+              </svg>
+            </button>
+          </div>
+        `;
+      }).join('');
+    },
+
+    /**
+     * Remove file from preview
+     */
+    removeFile: function(fileId) {
+      // Remove from attached files
+      this.state.attachedFiles = this.state.attachedFiles.filter(f => f.id !== fileId);
+      
+      // Cancel upload if in progress
+      if (this.state.uploadingFiles.has(fileId)) {
+        this.state.uploadingFiles.delete(fileId);
+      }
+
+      this.renderFilePreview();
+    },
+
+    /**
+     * Upload file using the provided API
+     */
+    uploadFile: function(fileData) {
+      this.log(`Starting upload for: ${fileData.file.name}`);
+      
+      return new Promise(async (resolve, reject) => {
+        // Check if mock upload is enabled
+        if (this.config.fileUpload.useMockUpload) {
+          this.log('Using mock upload mode...');
+          return this.mockUpload(fileData, resolve, reject);
+        }
+
+        // if (!this.axiosInstance2) {
+        //   this.log('Axios instance not available, attempting to initialize...');
+        //   if (!this.initAxios()) {
+        //     this.log('ERROR: Failed to initialize Axios');
+        //     reject(new Error('Axios not available'));
+        //     return;
+        //   } else {
+        //     this.log('Axios initialized successfully');
+        //   }
+        // }
+
+        const formData = new FormData();
+        formData.append('file', fileData.file);
+        this.log(`FormData prepared for: ${fileData.file.name}`);
+
+        this.state.uploadingFiles.set(fileData.id, true);
+        this.renderFilePreview();
+
+        try {
+          this.log(`Sending POST request to: ${this.config.fileUpload.apiEndpoint}`);
+          // const response = await this.axiosInstance2.post(this.config.fileUpload.apiEndpoint, formData, {
+          //   headers: {
+          //     'Content-Type': 'multipart/form-data',
+          //   },
+          //   // onUploadProgress: (progressEvent) => {
+          //   //   if (progressEvent.lengthComputable) {
+          //   //     const percentage = Math.round((progressEvent.loaded / progressEvent.total) * 100);
+          //   //     this.updateFileUploadProgress(fileData.id, percentage);
+          //   //     this.log(`Upload progress for ${fileData.file.name}: ${percentage}%`);
+          //   //   }
+          //   // }
+          // });
+          // const response = await this.axiosInstance2({
+          //   method: 'post',
+          //   url: this.config.fileUpload.apiEndpoint,
+          //   data: formData,
+          //   headers: {
+          //     'Content-Type': 'multipart/form-data',
+          //   },
+          //   // onUploadProgress: (progressEvent) => {
+          //   //   if (progressEvent.lengthComputable) {
+          //   //     const percentage = Math.round((progressEvent.loaded / progressEvent.total) * 100);
+          //   //     this.updateFileUploadProgress(fileData.id, percentage);
+          //   //     this.log(`Upload progress for ${fileData.file.name}: ${percentage}%`);
+          //   //   }
+          //   // }
+          // });\
+
+          const response = await axios({
+            method: 'post',
+            url: this.config.fileUpload.apiEndpoint,
+            data: formData,
+            headers: {
+              'Content-Type': 'multipart/form-data',
+            },
+            timeout: 30000,
+            // onUploadProgress: (progressEvent) => {
+            //   if (progressEvent.lengthComputable) {
+            //     const percentage = Math.round((progressEvent.loaded / progressEvent.total) * 100);
+            //     this.updateFileUploadProgress(fileData.id, percentage);
+            //     this.log(`Upload progress for ${fileData.file.name}: ${percentage}%`);
+            //   }
+            // }
+          })
+
+          this.state.uploadingFiles.delete(fileData.id);
+          this.log(`Upload response received for ${fileData.file.name}:`, response.data);
+          
+          // Update file data with upload result
+          const attachedFile = this.state.attachedFiles.find(f => f.id === fileData.id);
+          if (attachedFile) {
+            attachedFile.uploaded = true;
+            attachedFile.uploadUrl = response.data.data.location;
+            attachedFile.uploadResponse = response.data;
+            this.log(`File marked as uploaded: ${fileData.file.name} -> ${attachedFile.uploadUrl}`);
+          } else {
+            this.log('WARNING: Could not find attached file in state to update');
+          }
+
+          this.renderFilePreview();
+          resolve(response.data);
+        } catch (error) {
+          this.state.uploadingFiles.delete(fileData.id);
+          this.renderFilePreview();
+          
+          this.log(`Upload error for ${fileData.file.name}:`, error);
+          console.error('File upload failed:', error);
+          
+          // Enhanced error handling
+          let errorMessage = 'File upload failed';
+          if (error.code === 'ERR_NETWORK' || error.message === 'Network Error') {
+            errorMessage = 'Cannot connect to upload server. Please check if the server is running or enable mock upload mode.';
+            this.log('NETWORK ERROR: Server may not be running. Consider enabling mock upload for testing.');
+          } else if (error.response?.status === 404) {
+            errorMessage = 'Upload endpoint not found. Please check the API endpoint configuration.';
+          } else if (error.response?.status === 413) {
+            errorMessage = 'File too large. Please try a smaller file.';
+          } else if (error.response?.status >= 500) {
+            errorMessage = 'Server error. Please try again later.';
+          } else if (error.response?.data?.message) {
+            errorMessage = error.response.data.message;
+          }
+          
+          this.showErrorMessage(`Failed to upload "${fileData.file.name}": ${errorMessage}`);
+          reject(error);
+        }
+      });
+    },
+
+    /**
+     * Mock upload function for testing without server
+     */
+    mockUpload: function(fileData, resolve, reject) {
+      this.log(`Mock upload starting for: ${fileData.file.name}`);
+      this.state.uploadingFiles.set(fileData.id, true);
+      this.renderFilePreview();
+
+      // Simulate upload progress
+      let progress = 0;
+      const progressInterval = setInterval(() => {
+        progress += Math.random() * 30;
+        if (progress > 100) progress = 100;
+        this.updateFileUploadProgress(fileData.id, Math.round(progress));
+        
+        if (progress >= 100) {
+          clearInterval(progressInterval);
+          
+          // Simulate completion
+          setTimeout(() => {
+            this.state.uploadingFiles.delete(fileData.id);
+            
+            // Generate mock URL
+            const mockUrl = `https://mock-server.com/uploads/${Date.now()}-${fileData.file.name}`;
+            
+            // Update file data
+            const attachedFile = this.state.attachedFiles.find(f => f.id === fileData.id);
+            if (attachedFile) {
+              attachedFile.uploaded = true;
+              attachedFile.uploadUrl = mockUrl;
+              attachedFile.uploadResponse = { url: mockUrl, message: 'Mock upload successful' };
+              this.log(`Mock upload completed: ${fileData.file.name} -> ${mockUrl}`);
+            }
+
+            this.renderFilePreview();
+            resolve({ url: mockUrl, message: 'Mock upload successful' });
+          }, 200);
+        }
+      }, 100);
+    },
+
+    /**
+     * Upload all attached files
+     */
+    uploadAllFiles: function() {
+      this.log('Starting uploadAllFiles...');
+      const filesToUpload = this.state.attachedFiles.filter(f => !f.uploaded);
+      this.log('Files to upload count:', filesToUpload.length);
+      
+      if (filesToUpload.length === 0) {
+        this.log('No files to upload - returning empty array');
+        return Promise.resolve([]);
+      }
+
+      filesToUpload.forEach((file, index) => {
+        this.log(`File ${index + 1}: ${file.file.name} (${file.file.type})`);
+      });
+
+      const uploadPromises = filesToUpload.map((fileData, index) => 
+        this.uploadFile(fileData).then(result => {
+          this.log(`Upload successful for file ${index + 1}: ${fileData.file.name}`);
+          return result;
+        }).catch(error => {
+          this.log(`Upload failed for file ${index + 1}: ${fileData.file.name} - ${error.message}`);
+          console.error('Upload failed for file:', fileData.file.name, error);
+          return null; // Continue with other uploads
+        })
+      );
+
+      return Promise.all(uploadPromises);
+    },
+
+    /**
+     * Update file upload progress
+     */
+    updateFileUploadProgress: function(fileId, percentage) {
+      const fileItem = this.elements.filePreview.querySelector(`[data-file-id="${fileId}"]`);
+      if (fileItem) {
+        let statusEl = fileItem.querySelector('.file-status');
+        if (statusEl) {
+          statusEl.textContent = `Uploading... ${percentage}%`;
+        }
+      }
+    },
+
+    /**
+     * Get file icon based on file type
+     */
+    getFileIcon: function(mimeType) {
+      if (mimeType.startsWith('image/')) {
+        return '<svg viewBox="0 0 24 24" width="20" height="20"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>';
+      } else if (mimeType === 'application/pdf') {
+        return '<svg viewBox="0 0 24 24" width="20" height="20"><path d="M20 2H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-8.5 7.5c0 .83-.67 1.5-1.5 1.5H9v2H7.5V7H10c.83 0 1.5.67 1.5 1.5v1zm5 2c0 .83-.67 1.5-1.5 1.5h-2.5V7H15c.83 0 1.5.67 1.5 1.5v3zm-5-2H9v1h1.5V9.5zM15 8.5h-1.5v3H15v-3z"/></svg>';
+      } else if (mimeType.includes('document') || mimeType.includes('word')) {
+        return '<svg viewBox="0 0 24 24" width="20" height="20"><path d="M6,2A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2H6Z"/></svg>';
+      } else {
+        return '<svg viewBox="0 0 24 24" width="20" height="20"><path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z"/></svg>';
+      }
+    },
+
+    /**
+     * Format file size for display
+     */
+    formatFileSize: function(bytes) {
+      if (bytes === 0) return '0 Bytes';
+      const k = 1024;
+      const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+      const i = Math.floor(Math.log(bytes) / Math.log(k));
+      return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    },
+
+    /**
+     * Get file access URL from filename
+     * Uses the access endpoint to get the actual file URL
+     */
+    getFileAccessUrl: function(fileName) {
+      // return new Promise(async(resolve, reject) => {
+      //   try{
+      //     if (!fileName) return null;
+      
+      // // Remove any existing path and keep only the filename
+      // const cleanFileName = fileName.split('/').pop();
+      
+      // // Construct the access URL
+      // const baseUrl = this.config.serverUrl || '';
+      // const accessEndpoint = this.config.fileUpload.accessEndpoint;
+
+      // const image = await axios.get(`${accessEndpoint}/${cleanFileName}`);
+      
+      // resolve(image);
+      //   }catch(error) {
+      //     reject(error);
+      //   }
+      // })
+
+      if (!fileName) return null;
+      
+      // Remove any existing path and keep only the filename
+      const cleanFileName = fileName.split('/').pop();
+      
+      // Construct the access URL
+      const baseUrl = this.config.serverUrl || '';
+      const accessEndpoint = this.config.fileUpload.accessEndpoint;
+
+      return `${accessEndpoint}/buffer/${cleanFileName}`;
+    },
+
+    /**
+     * Extract filename from file URI or path
+     */
+    extractFileName: function(fileUri) {
+      if (!fileUri) return '';
+      
+      // Handle different URI formats
+      if (fileUri.includes('/')) {
+        return fileUri.split('/').pop();
+      }
+      
+      return fileUri;
     },
   };
 
