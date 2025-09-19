@@ -693,6 +693,257 @@
     opacity: 1;
 }
 
+/* Enhanced File Preview Styles - Used in JavaScript */
+.file-preview-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+    border: 1px solid var(--chat-border);
+    border-radius: 12px;
+    margin-bottom: 8px;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.file-preview-item::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--chat-primary), var(--chat-secondary));
+    transform: scaleX(0);
+    transition: transform 0.3s ease;
+}
+
+.file-preview-item:hover {
+    background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+    border-color: var(--chat-primary);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+    transform: translateY(-1px);
+}
+
+.file-preview-item:hover::before {
+    transform: scaleX(1);
+}
+
+/* File Icon Styles */
+.file-icon {
+    width: 48px;
+    height: 48px;
+    background: linear-gradient(135deg, var(--chat-primary), var(--chat-secondary));
+    color: white;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 600;
+    flex-shrink: 0;
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.file-icon::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
+    transform: rotate(45deg);
+    transition: all 0.3s ease;
+    opacity: 0;
+}
+
+.file-preview-item:hover .file-icon::before {
+    opacity: 1;
+    transform: rotate(45deg) translate(50%, 50%);
+}
+
+.file-icon svg {
+    width: 20px;
+    height: 20px;
+    fill: currentColor;
+    filter: drop-shadow(0 1px 2px rgba(0,0,0,0.1));
+}
+
+/* File Info Container */
+.file-info {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+/* File Name Styles */
+.file-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--chat-text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.2;
+    margin: 0;
+    letter-spacing: -0.01em;
+}
+
+/* File Size Styles */
+.file-size {
+    font-size: 12px;
+    color: var(--chat-text-secondary);
+    font-weight: 500;
+    opacity: 0.8;
+    margin: 0;
+}
+
+/* File Status Styles */
+.file-status {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 12px;
+    display: inline-block;
+    margin-top: 2px;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    animation: pulse 2s infinite;
+}
+
+.file-status:contains("Uploading") {
+    background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+    color: #1976d2;
+    border: 1px solid #90caf9;
+}
+
+.file-status:contains("Failed") {
+    background: linear-gradient(135deg, #ffebee, #ffcdd2);
+    color: #d32f2f;
+    border: 1px solid #ef9a9a;
+    animation: none;
+}
+
+.file-status:contains("Complete") {
+    background: linear-gradient(135deg, #e8f5e8, #c8e6c9);
+    color: #388e3c;
+    border: 1px solid #a5d6a7;
+    animation: none;
+}
+
+/* Remove Button Enhanced */
+.file-remove-btn {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: none;
+    background: linear-gradient(135deg, #ff4444, #ff6b6b);
+    color: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    opacity: 0.8;
+    transition: all 0.3s ease;
+    flex-shrink: 0;
+    box-shadow: 0 2px 4px rgba(255, 68, 68, 0.3);
+    position: relative;
+    overflow: hidden;
+}
+
+.file-remove-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(45deg, transparent, rgba(255,255,255,0.2), transparent);
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+}
+
+.file-remove-btn:hover {
+    opacity: 1;
+    transform: scale(1.1);
+    box-shadow: 0 4px 8px rgba(255, 68, 68, 0.4);
+}
+
+.file-remove-btn:hover::before {
+    transform: translateX(100%);
+}
+
+.file-remove-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: 0 1px 2px rgba(255, 68, 68, 0.2);
+}
+
+.file-remove-btn svg {
+    width: 14px;
+    height: 14px;
+    fill: currentColor;
+}
+
+/* Pulse animation for uploading status */
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 0.7;
+        transform: scale(0.98);
+    }
+}
+
+/* Mobile responsiveness for file preview */
+@media (max-width: 480px) {
+    .file-preview-item {
+        gap: 10px;
+        padding: 10px;
+    }
+    
+    .file-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+    }
+    
+    .file-icon svg {
+        width: 18px;
+        height: 18px;
+    }
+    
+    .file-name {
+        font-size: 13px;
+    }
+    
+    .file-size {
+        font-size: 11px;
+    }
+    
+    .file-remove-btn {
+        width: 24px;
+        height: 24px;
+    }
+    
+    .file-remove-btn svg {
+        width: 12px;
+        height: 12px;
+    }
+}
+
 .chat-input-form {
     display: flex;
     gap: 8px;
@@ -1035,5 +1286,151 @@
         100% {
             opacity: 1;
         }
+    }
+}
+
+/* Message Attachments Styles */
+.message-attachments {
+    margin-top: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.message-attachment {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 12px;
+    background: var(--chat-surface);
+    border: 1px solid var(--chat-border);
+    border-radius: 8px;
+    transition: all 0.2s ease;
+}
+
+.message-attachment:hover {
+    background: #f0f0f0;
+    border-color: var(--chat-primary);
+}
+
+/* Image Attachments */
+.message-attachment.image-attachment {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+    max-width: 300px;
+}
+
+.attachment-image-preview {
+    position: relative;
+    border-radius: 6px;
+    overflow: hidden;
+    background: #f8f9fa;
+}
+
+.attachment-image {
+    width: 100%;
+    height: auto;
+    max-height: 200px;
+    object-fit: cover;
+    display: block;
+    border-radius: 6px;
+    transition: transform 0.2s ease;
+}
+
+.attachment-image:hover {
+    transform: scale(1.02);
+}
+
+/* Attachment Info */
+.attachment-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex: 1;
+    min-width: 0;
+}
+
+.attachment-name {
+    font-weight: 500;
+    color: var(--chat-text);
+    word-break: break-word;
+    font-size: 13px;
+}
+
+.attachment-size {
+    font-size: 12px;
+    color: var(--chat-text-secondary);
+}
+
+/* Attachment Icon for non-image files */
+.attachment-icon {
+    flex-shrink: 0;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--chat-primary);
+    color: white;
+    border-radius: 6px;
+    font-size: 18px;
+}
+
+/* Download/View Button */
+.attachment-download {
+    flex-shrink: 0;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--chat-primary);
+    color: white;
+    border-radius: 50%;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    align-self: flex-start;
+}
+
+.attachment-download:hover {
+    background: var(--chat-secondary);
+    transform: scale(1.1);
+}
+
+.attachment-download svg {
+    fill: currentColor;
+}
+
+/* Image attachment specific download button positioning */
+.image-attachment .attachment-download {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(4px);
+    z-index: 1;
+}
+
+.image-attachment .attachment-download:hover {
+    background: rgba(0, 0, 0, 0.9);
+}
+
+/* Responsive adjustments for attachments */
+@media (max-width: 480px) {
+    .message-attachment.image-attachment {
+        max-width: 250px;
+    }
+    
+    .attachment-image {
+        max-height: 150px;
+    }
+    
+    .attachment-name {
+        font-size: 12px;
+    }
+    
+    .attachment-size {
+        font-size: 11px;
     }
 }
