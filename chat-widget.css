@@ -538,6 +538,15 @@
     opacity: 0.1;
 }
 
+.chat-message.sent .message-content {
+    opacity: 1;
+}
+
+.chat-message.sent .message-status {
+    color: var(--chat-success);
+    font-weight: 500;
+}
+
 .chat-message.failed .message-status {
     color: var(--chat-error);
 }

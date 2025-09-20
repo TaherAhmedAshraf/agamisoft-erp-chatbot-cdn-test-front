@@ -175,6 +175,7 @@
       },
       attachedFiles: [],
       uploadingFiles: new Map(),
+      pendingMessages: new Map(), // Track pending messages by temporary ID
     },
 
     // Socket reference
@@ -910,6 +911,12 @@
         this.socket.on("mark-message-as-read-response", function (response) {
           self.log("Message receipt:", response);
         });
+
+        // Message sent confirmation
+        this.socket.on("message-sent", function (data) {
+          self.log("Message sent confirmation:", data);
+          self.handleMessageSent(data);
+        });
       } catch (error) {
         console.error(
           "ChatWidget: Failed to initialize socket connection:",
@@ -1228,6 +1235,15 @@
       this.markMessageAsFailed(error.originalMessage);
     },
 
+    handleMessageSent: function (data) {
+      this.log("Message sent successfully:", data);
+      
+      // Find the pending message by ID and mark it as sent
+      if (data.messageId) {
+        this.markMessageAsSent(data.messageId, data.status);
+      }
+    },
+
     handleEndChatError: function (error) {
       this.log("End chat error:", error);
       this.showErrorMessage("Failed to end chat. Please try again.");
@@ -1286,6 +1302,8 @@
      * Send text-only message
      */
     sendTextMessage: function(message) {
+      const tempId = "pending-" + Date.now() + "-" + Math.random().toString(36).substr(2, 9);
+      
       const messageData = {
         message: message,
         chatId: this.state.session.chatSessionId,
@@ -1296,9 +1314,16 @@
 
       this.socket.emit("send-message", messageData);
 
+      // Store pending message info for tracking
+      this.state.pendingMessages.set(tempId, {
+        message: message,
+        timestamp: new Date(),
+        type: 'text'
+      });
+
       // Add message to UI immediately (optimistic)
       this.addMessage({
-        id: "pending-" + Date.now(),
+        id: tempId,
         message: message,
         sender_type: 2,
         senderId: this.state.session.customerId,
@@ -1372,9 +1397,20 @@
 
         this.socket.emit("send-message", messageData);
 
+        // Generate unique temporary ID for tracking
+        const tempId = "pending-" + Date.now() + "-" + Math.random().toString(36).substr(2, 9);
+
+        // Store pending message info for tracking
+        this.state.pendingMessages.set(tempId, {
+          message: message || "",
+          timestamp: new Date(),
+          type: 'file',
+          files: messageData.files
+        });
+
         // Add message to UI
         this.addMessage({
-          id: "pending-" + Date.now(),
+          id: tempId,
           message: message || "",
           sender_type: 2,
           senderId: this.state.session.customerId,
@@ -1602,6 +1638,76 @@
     },
 
     /**
+     * Mark message as sent
+     */
+    markMessageAsSent: function (messageId, status) {
+      this.log(`Attempting to mark message as sent: ${messageId} with status: ${status}`);
+      
+      // First try to find by data-message-id attribute (exact match)
+      let messageEl = this.elements.messages.querySelector(`[data-message-id="${messageId}"]`);
+      let matchingTempId = null;
+      
+      // If not found by exact ID, search through our pending messages tracking
+      if (!messageEl) {
+        this.log(`Message with ID ${messageId} not found, searching pending messages...`);
+        
+        // Look through pending messages to find a match
+        for (const [tempId, pendingInfo] of this.state.pendingMessages.entries()) {
+          const tempMessageEl = this.elements.messages.querySelector(`[data-message-id="${tempId}"]`);
+          if (tempMessageEl && tempMessageEl.classList.contains('customer')) {
+            this.log(`Found pending message with temp ID: ${tempId}`);
+            matchingTempId = tempId;
+            messageEl = tempMessageEl;
+            break; // Take the first (oldest) pending message
+          }
+        }
+        
+        // If still not found, log the issue but don't proceed with fallback
+        if (!messageEl) {
+          this.log(`No matching message found for ID: ${messageId}. Pending messages:`, Array.from(this.state.pendingMessages.keys()));
+          return; // Don't update anything if we can't find the right message
+        }
+      }
+
+      if (messageEl) {
+        // Verify this is actually a customer message before updating
+        if (!messageEl.classList.contains('customer')) {
+          this.log(`ERROR: Found message is not a customer message, skipping update for ID: ${messageId}`);
+          return;
+        }
+        
+        // Update message ID to the real one from server
+        messageEl.dataset.messageId = messageId;
+        
+        // Remove any temporary states
+        messageEl.classList.remove("pending", "uploading");
+        messageEl.classList.add("sent");
+
+        // Find or create status element
+        let statusEl = messageEl.querySelector(".message-status");
+        if (!statusEl) {
+          // Create status element if it doesn't exist
+          statusEl = document.createElement("div");
+          statusEl.className = "message-status";
+          messageEl.appendChild(statusEl);
+        }
+
+        // Update status text and styling
+        statusEl.textContent = status === "delivered" ? "Sent" : "Delivered";
+        statusEl.style.color = "#4caf50"; // Green color for success
+        statusEl.style.display = "block"; // Make sure it's visible
+
+        // Clean up pending tracking if we found a match
+        if (matchingTempId) {
+          this.state.pendingMessages.delete(matchingTempId);
+          this.log(`Cleaned up pending message tracking for: ${matchingTempId}`);
+        }
+
+        this.log(`Message successfully marked as sent: ${messageId} with status: ${status}`);
+      }
+    },
+
+    /**
      * Update typing indicator display
      */
     updateTypingIndicator: function () {
@@ -1683,6 +1789,7 @@
       this.state.agentTyping = false;
       this.state.attachedFiles = [];
       this.state.uploadingFiles.clear();
+      this.state.pendingMessages.clear(); // Clear pending message tracking
 
       // Clear stored session
       this.clearStoredSession();
