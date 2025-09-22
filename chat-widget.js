@@ -856,7 +856,7 @@
 
         // Chat events
         this.socket.on("chat-started", function (data) {
-          self.handleChatStarted(data);
+          self.handleChatStarted(data.data);
         });
 
         // Session management events
@@ -915,7 +915,7 @@
         // Message sent confirmation
         this.socket.on("message-sent", function (data) {
           self.log("Message sent confirmation:", data);
-          self.handleMessageSent(data);
+          self.handleMessageSent(data.dat);
         });
       } catch (error) {
         console.error(
