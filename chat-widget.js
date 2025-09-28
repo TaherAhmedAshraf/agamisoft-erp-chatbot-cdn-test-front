@@ -915,7 +915,7 @@
         // Message sent confirmation
         this.socket.on("message-sent", function (data) {
           self.log("Message sent confirmation:", data);
-          self.handleMessageSent(data.dat);
+          self.handleMessageSent(data.data);
         });
       } catch (error) {
         console.error(
@@ -1526,23 +1526,23 @@
       } else {
         let attachmentsHtml = '';
         // Handle both files and fileMetadata for backward compatibility and display
-        const filesToDisplay = messageData.fileMetadata || messageData.attachments || messageData.files || [];
+        const filesToDisplay = messageData.files || [];
         
         if (filesToDisplay.length > 0) {
           attachmentsHtml = `
             <div class="message-attachments">
               ${filesToDisplay.map(file => {
                 // Handle different file object formats
-                const fileName = file.fileName || file.name;
-                const fileSize = file.fileSize || file.size;
-                const fileType = file.fileType || file.type || 'application/octet-stream';
-                const fileUri = file.uri || file.fileUrl || file.url;
-                
+                const fileName = file.file_name ;
+                const fileSize = file.file_size || file.size;
+                const fileType = file.uri ? this.getFileTypeFromName(file.file_name) : file.type;
+                const fileUri = file.uri;
+
                 // Get the actual access URL for the file
                 const fileAccessUrl = fileUri ? this.getFileAccessUrl(this.extractFileName(fileUri)) : null;
                 
                 // Check if it's an image and should show preview
-                const isImage = fileType && fileType.startsWith('image/');
+                const isImage = fileType === 'image';
                 
                 if (isImage && fileAccessUrl) {
                   // Render image preview
@@ -1559,9 +1559,7 @@
                         ` : ''}
                       </div>
                       <div class="attachment-info">
-                        <div class="attachment-name">${this.escapeHtml(fileName)}</div>
-                        ${fileSize ? `<div class="attachment-size">${this.formatFileSize(fileSize)}</div>` : ''}
-                      </div>
+                        <div class="attachment-name">${this.escapeHtml(messageData.message)}</div>
                     </div>
                   `;
                 } else {
@@ -2634,25 +2632,6 @@
      * Uses the access endpoint to get the actual file URL
      */
     getFileAccessUrl: function(fileName) {
-      // return new Promise(async(resolve, reject) => {
-      //   try{
-      //     if (!fileName) return null;
-      
-      // // Remove any existing path and keep only the filename
-      // const cleanFileName = fileName.split('/').pop();
-      
-      // // Construct the access URL
-      // const baseUrl = this.config.serverUrl || '';
-      // const accessEndpoint = this.config.fileUpload.accessEndpoint;
-
-      // const image = await axios.get(`${accessEndpoint}/${cleanFileName}`);
-      
-      // resolve(image);
-      //   }catch(error) {
-      //     reject(error);
-      //   }
-      // })
-
       if (!fileName) return null;
       
       // Remove any existing path and keep only the filename
@@ -2663,6 +2642,21 @@
       const accessEndpoint = this.config.fileUpload.accessEndpoint;
 
       return `${accessEndpoint}/buffer/${cleanFileName}`;
+    },
+    getFileTypeFromName: function(fileName) {
+      if (!fileName) return 'unknown';
+      
+      const extension = fileName.split('.').pop().toLowerCase();
+      const imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp'];
+      const documentExtensions = ['pdf', 'doc', 'docx', 'txt', 'odt'];
+      
+      if (imageExtensions.includes(extension)) {
+        return 'image';
+      } else if (documentExtensions.includes(extension)) {
+        return 'document';
+      } else {
+        return 'unknown';
+      }
     },
 
     /**
