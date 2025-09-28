@@ -29,6 +29,7 @@
     // Configuration
     config: {
       serverUrl: "http://localhost:3000",
+      apiKey: null,
       position: "bottom-right",
       theme: "default",
       welcomeMessage: "Hello! How can we help you today?",
@@ -210,6 +211,11 @@
 
       if (!this.config.serverUrl) {
         console.error("ChatWidget: serverUrl is required");
+        return;
+      }
+
+      if (!this.config.apiKey) {
+        console.error("ChatWidget: apiKey is required");
         return;
       }
 
@@ -816,6 +822,9 @@
         this.socket = io(this.config.serverUrl, {
           transports: ["websocket", "polling"],
           withCredentials: true,
+          auth: { 
+            api_key: this.config.apiKey 
+          }
         });
 
         // Connection events
