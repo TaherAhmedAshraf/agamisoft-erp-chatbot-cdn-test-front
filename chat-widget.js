@@ -803,15 +803,7 @@
         }
       });
 
-      // Warn before leaving page if chat is active
-      window.addEventListener("beforeunload", function (e) {
-        if (self.state.isChatStarted && self.state.session.chatSessionId) {
-          e.preventDefault();
-          e.returnValue =
-            "You have an active chat session. Are you sure you want to leave?";
-          return e.returnValue;
-        }
-      });
+
     },
 
     /**
