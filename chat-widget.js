@@ -153,6 +153,49 @@
         useMockUpload: false, // Set to true for testing without server
         mockDelay: 1000 // Mock upload delay in ms
       },
+
+      // User Information Form Configuration
+      userForm: {
+        enabled: true, // Set to false to skip user form and start chat immediately
+        title: "Please provide your details to start chatting:",
+        submitButtonText: "Start Chat",
+        fields: [
+          {
+            id: 'name',
+            type: 'text',
+            label: 'Name *',
+            placeholder: 'Enter your name',
+            required: true,
+            validation: {
+              minLength: 2,
+              maxLength: 50,
+              pattern: null // regex pattern for validation
+            }
+          },
+          {
+            id: 'phone',
+            type: 'tel',
+            label: 'Phone *',
+            placeholder: 'Enter your phone number',
+            required: true,
+            validation: {
+              minLength: 10,
+              maxLength: 15,
+              pattern: null
+            }
+          },
+          {
+            id: 'email',
+            type: 'email',
+            label: 'Email',
+            placeholder: 'Enter your email (optional)',
+            required: false,
+            validation: {
+              pattern: null // Will use browser's built-in email validation
+            }
+          }
+        ]
+      },
     },
 
     // State
@@ -295,6 +338,65 @@
     },
 
     /**
+     * Generate user form HTML dynamically based on configuration
+     */
+    generateUserFormHTML: function () {
+      this.log("generateUserFormHTML called, userForm.enabled:", this.config.userForm.enabled);
+      
+      if (!this.config.userForm.enabled) {
+        this.log("User form disabled, returning empty string");
+        return ''; // No form needed
+      }
+
+      const formConfig = this.config.userForm;
+      
+      let formFieldsHTML = '';
+      
+      // Generate form fields based on configuration
+      formConfig.fields.forEach(field => {
+        const requiredAttr = field.required ? 'required' : '';
+        const fieldId = `customer-${field.id}`;
+        const validation = field.validation || {};
+        
+        // Build validation attributes
+        let validationAttrs = '';
+        if (validation.minLength) validationAttrs += ` minlength="${validation.minLength}"`;
+        if (validation.maxLength) validationAttrs += ` maxlength="${validation.maxLength}"`;
+        if (validation.pattern) validationAttrs += ` pattern="${validation.pattern}"`;
+        
+        formFieldsHTML += `
+          <div class="form-group">
+            <label for="${fieldId}">${this.escapeHtml(field.label)}</label>
+            <input 
+              type="${field.type}" 
+              id="${fieldId}" 
+              name="${field.id}" 
+              placeholder="${this.escapeHtml(field.placeholder || '')}"
+              ${requiredAttr}
+              ${validationAttrs}
+            >
+          </div>
+        `;
+      });
+
+      const formHTML = `
+        <div class="chat-start" style="display: none;">
+          <div class="chat-welcome">
+            <p>${this.config.text.welcomeMessage}</p>
+            <p>${this.escapeHtml(formConfig.title)}</p>
+          </div>
+          <form class="chat-start-form">
+            ${formFieldsHTML}
+            <button type="submit" class="chat-start-btn">${this.escapeHtml(formConfig.submitButtonText)}</button>
+          </form>
+        </div>
+      `;
+      
+      this.log("Generated form HTML:", formHTML);
+      return formHTML;
+    },
+
+    /**
      * Get the widget HTML structure
      */
     getWidgetHTML: function () {
@@ -342,35 +444,7 @@
                         </div>
 
                         <!-- Start Chat Form -->
-                        <div class="chat-start" style="display: none;">
-                            <div class="chat-welcome">
-                                <p>${this.config.text.welcomeMessage}</p>
-                                <p>${this.config.text.startChatText}</p>
-                            </div>
-                            <form class="chat-start-form">
-                                <div class="form-group">
-                                    <label for="customer-name">${
-                                      this.config.text.nameLabel
-                                    }</label>
-                                    <input type="text" id="customer-name" name="name" required>
-                                </div>
-                                <div class="form-group">
-                                    <label for="customer-phone">${
-                                      this.config.text.phoneLabel
-                                    }</label>
-                                    <input type="tel" id="customer-phone" name="phone" required>
-                                </div>
-                                <div class="form-group">
-                                    <label for="customer-email">${
-                                      this.config.text.emailLabel
-                                    }</label>
-                                    <input type="email" id="customer-email" name="email">
-                                </div>
-                                <button type="submit" class="chat-start-btn">${
-                                  this.config.text.startChatButton
-                                }</button>
-                            </form>
-                        </div>
+                        ${this.generateUserFormHTML()}
 
                         <!-- Chat Messages Container -->
                         <div class="chat-conversation" style="display: none;max-height:300px;">
@@ -857,7 +931,22 @@
 
         // Chat events
         this.socket.on("chat-started", function (data) {
-          self.handleChatStarted(data.data);
+          self.log("Raw chat-started event received:", data);
+          
+          // Handle different data structures
+          let chatData = data;
+          if (data.data) {
+            chatData = data.data;
+          }
+          
+          // Ensure required fields exist
+          if (!chatData.chatSessionId) {
+            self.log("ERROR: No chatSessionId in chat-started data");
+            return;
+          }
+          
+          self.log("Processing chat-started with data:", chatData);
+          self.handleChatStarted(chatData);
         });
 
         // Session management events
@@ -931,61 +1020,138 @@
      * Update connection status UI
      */
     updateConnectionStatus: function (status) {
+      this.log("updateConnectionStatus called with status:", status);
+      this.log("userForm.enabled:", this.config.userForm.enabled);
+      
       const connectingEl =
         this.elements.container.querySelector(".chat-connecting");
       const startEl = this.elements.container.querySelector(".chat-start");
       const statusEl = this.elements.container.querySelector(".chat-status");
 
+      this.log("Found elements:", {
+        connecting: !!connectingEl,
+        start: !!startEl,
+        status: !!statusEl
+      });
+
       switch (status) {
         case "connecting":
-          connectingEl.style.display = "block";
-          startEl.style.display = "none";
+          if (connectingEl) connectingEl.style.display = "block";
+          if (startEl) startEl.style.display = "none";
           statusEl.textContent = "Connecting...";
           break;
         case "connected":
-          connectingEl.style.display = "none";
-          startEl.style.display = "block";
-          statusEl.textContent = "Connected";
+          if (connectingEl) connectingEl.style.display = "none";
+          
+          // Check if user form is enabled
+          if (this.config.userForm.enabled && startEl) {
+            this.log("Showing start form");
+            startEl.style.display = "block";
+            statusEl.textContent = "Connected";
+          } else {
+            this.log("Skipping form, starting chat immediately");
+            // Skip form and start chat immediately
+            this.startChatWithoutForm();
+          }
           break;
         case "disconnected":
           statusEl.textContent = "Disconnected";
           break;
         case "error":
-          connectingEl.style.display = "none";
-          startEl.style.display = "block";
+          if (connectingEl) connectingEl.style.display = "none";
+          if (startEl && this.config.userForm.enabled) startEl.style.display = "block";
           statusEl.textContent = "Connection Error";
           break;
       }
     },
 
     /**
+     * Start chat without form (when userForm.enabled is false)
+     */
+    startChatWithoutForm: function() {
+      this.log("startChatWithoutForm called");
+      
+      if (!this.state.isConnected) {
+        this.log("ERROR: Not connected to chat service");
+        this.showErrorMessage("Not connected to chat service");
+        return;
+      }
+
+      // Set minimal customer info
+      this.state.customerInfo = {
+        name: "Anonymous User",
+        api_key: this.config.apiKey,
+      };
+
+      this.log("Customer info set:", this.state.customerInfo);
+
+      // Update status
+      const statusEl = this.elements.container.querySelector(".chat-status");
+      if (statusEl) {
+        statusEl.textContent = "Starting chat...";
+      }
+
+      // Emit customer join event
+      this.log("Emitting customer-join event");
+      this.socket.emit("customer-join", this.state.customerInfo);
+    },
+
+    /**
      * Handle chat started event
      */
     handleChatStarted: function (data) {
-      this.log("Chat started:", data);
+      this.log("handleChatStarted called with data:", data);
 
       this.state.isChatStarted = true;
       this.state.session = {
-        customerId: data.customerId,
+        customerId: data.customerId || "anonymous",
         chatSessionId: data.chatSessionId,
       };
+
+      this.log("Chat session set:", this.state.session);
 
       // Store session for persistence
       this.storeSession(data);
 
-      // Update UI
-      this.elements.container.querySelector(".chat-start").style.display =
-        "none";
-      this.elements.container.querySelector(
-        ".chat-conversation"
-      ).style.display = "flex";
-      this.elements.container.querySelector(
-        ".chat-input-container"
-      ).style.display = "block";
-      this.elements.container.querySelector(".chat-status").textContent =
-        "Online";
+      // Update UI - Hide connecting state
+      const connectingEl = this.elements.container.querySelector(".chat-connecting");
+      if (connectingEl) {
+        this.log("Hiding connecting element");
+        connectingEl.style.display = "none";
+      }
+
+      // Hide start form if it exists
+      const startEl = this.elements.container.querySelector(".chat-start");
+      if (startEl) {
+        this.log("Hiding start form element");
+        startEl.style.display = "none";
+      }
+
+      // Show chat conversation and input areas
+      const conversationEl = this.elements.container.querySelector(".chat-conversation");
+      const inputEl = this.elements.container.querySelector(".chat-input-container");
+      const statusEl = this.elements.container.querySelector(".chat-status");
+
+      this.log("Found UI elements:", {
+        conversation: !!conversationEl,
+        input: !!inputEl,
+        status: !!statusEl
+      });
+
+      if (conversationEl) {
+        this.log("Showing conversation element");
+        conversationEl.style.display = "flex";
+      }
+      if (inputEl) {
+        this.log("Showing input element");
+        inputEl.style.display = "block";
+      }
+      if (statusEl) {
+        statusEl.textContent = "Online";
+      }
 
       // Add welcome message
+      this.log("Adding welcome message:", data.message);
       this.addMessage({
         id: "welcome",
         message: data.message,
@@ -993,8 +1159,16 @@
         timestamp: new Date(),
       });
 
-      // Focus input
-      this.elements.input.focus();
+      // Update send button state now that chat is started
+      this.updateSendButton();
+
+      // Focus input if available
+      if (this.elements.input) {
+        this.log("Focusing input element");
+        this.elements.input.focus();
+      } else {
+        this.log("WARNING: Input element not found");
+      }
     },
 
     /**
@@ -1183,8 +1357,12 @@
         timestamp: new Date(),
       });
 
-      // Show start form
-      this.updateConnectionStatus("connected");
+      // Show start form or start chat immediately based on configuration
+      if (this.config.userForm.enabled) {
+        this.updateConnectionStatus("connected");
+      } else {
+        this.startChatWithoutForm();
+      }
     },
 
     /**
@@ -1251,20 +1429,86 @@
     },
 
     /**
+     * Validate form field based on configuration
+     */
+    validateField: function(fieldConfig, value) {
+      const validation = fieldConfig.validation || {};
+      const errors = [];
+
+      // Required field validation
+      if (fieldConfig.required && (!value || value.trim().length === 0)) {
+        errors.push(`${fieldConfig.label} is required`);
+        return errors;
+      }
+
+      // Skip further validation if field is empty and not required
+      if (!value || value.trim().length === 0) {
+        return errors;
+      }
+
+      // Length validation
+      if (validation.minLength && value.length < validation.minLength) {
+        errors.push(`${fieldConfig.label} must be at least ${validation.minLength} characters`);
+      }
+
+      if (validation.maxLength && value.length > validation.maxLength) {
+        errors.push(`${fieldConfig.label} must be no more than ${validation.maxLength} characters`);
+      }
+
+      // Pattern validation
+      if (validation.pattern) {
+        const regex = new RegExp(validation.pattern);
+        if (!regex.test(value)) {
+          errors.push(`${fieldConfig.label} format is invalid`);
+        }
+      }
+
+      // Email validation for email type fields
+      if (fieldConfig.type === 'email' && value) {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(value)) {
+          errors.push(`${fieldConfig.label} must be a valid email address`);
+        }
+      }
+
+      return errors;
+    },
+
+    /**
      * Handle start chat form submission
      */
     handleStartChat: function (e) {
       const formData = new FormData(e.target);
-
-      this.state.customerInfo = {
-        name: formData.get("name").trim(),
-        phone: formData.get("phone").trim(),
-        email: formData.get("email").trim(),
+      const customerInfo = {
         api_key: this.config.apiKey,
       };
 
-      if (!this.state.customerInfo.name || !this.state.customerInfo.phone) {
-        this.showErrorMessage("Name and phone are required");
+      // Collect all field values based on configuration
+      const formConfig = this.config.userForm;
+      const allErrors = [];
+
+      formConfig.fields.forEach(fieldConfig => {
+        const value = formData.get(fieldConfig.id);
+        customerInfo[fieldConfig.id] = value ? value.trim() : '';
+
+        // Validate field
+        const fieldErrors = this.validateField(fieldConfig, customerInfo[fieldConfig.id]);
+        allErrors.push(...fieldErrors);
+      });
+
+      // Show validation errors if any
+      if (allErrors.length > 0) {
+        this.showErrorMessage(allErrors[0]); // Show first error
+        return;
+      }
+
+      // Check if at least one required field has a value
+      const hasRequiredData = formConfig.fields.some(field => 
+        field.required && customerInfo[field.id] && customerInfo[field.id].length > 0
+      );
+
+      if (!hasRequiredData) {
+        this.showErrorMessage("Please fill in the required fields");
         return;
       }
 
@@ -1273,7 +1517,10 @@
         return;
       }
 
-      this.socket.emit("customer-join", this.state.customerInfo);
+      // Store customer info
+      this.state.customerInfo = customerInfo;
+
+      this.socket.emit("customer-join", customerInfo);
     },
 
     /**
@@ -1504,6 +1751,11 @@
      * Add message to UI
      */
     addMessage: function (messageData) {
+      if (!this.elements.messages) {
+        this.log("ERROR: Messages container not found");
+        return;
+      }
+
       this.state.messages.push(messageData);
 
       // Check if user is near bottom before adding message
@@ -1733,6 +1985,10 @@
      */
     updateSendButton: function () {
       const sendBtn = this.elements.container.querySelector(".chat-send-btn");
+      if (!sendBtn || !this.elements.input) {
+        return; // Elements not ready yet
+      }
+
       const hasText = this.elements.input.value.trim().length > 0;
       const hasFiles = this.state.attachedFiles.length > 0;
 

@@ -394,6 +394,7 @@ ChatWidget.init({
 ChatWidget.init({
     // Required
     serverUrl: 'http://your-backend-url',
+    apiKey: 'your-api-key',
     
     // Basic Options
     companyName: 'Your Company',
@@ -401,6 +402,40 @@ ChatWidget.init({
     theme: 'default', // 'default' or 'dark'
     position: 'bottom-right', // corner position
     autoOpen: false, // auto-open on page load
+    
+    // User Information Form (NEW!)
+    userForm: {
+        enabled: true, // Set to false to skip form entirely
+        title: 'Please provide your details to start chatting:',
+        submitButtonText: 'Start Chat',
+        fields: [
+            {
+                id: 'name',
+                type: 'text',
+                label: 'Name *',
+                placeholder: 'Enter your name',
+                required: true,
+                validation: {
+                    minLength: 2,
+                    maxLength: 50
+                }
+            },
+            {
+                id: 'phone',
+                type: 'tel', 
+                label: 'Phone *',
+                placeholder: 'Enter your phone number',
+                required: true
+            },
+            {
+                id: 'email',
+                type: 'email',
+                label: 'Email',
+                placeholder: 'Enter your email (optional)',
+                required: false
+            }
+        ]
+    },
     
     // Colors Customization
     colors: {
@@ -423,6 +458,120 @@ ChatWidget.init({
         enabled: true,
         maxFileSize: 10 * 1024 * 1024, // 10MB
         allowedTypes: ['image/*', 'application/pdf', '.doc', '.docx']
+    }
+});
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>🎯 Dynamic User Form Examples</h2>
+            <p>The chat widget now supports fully customizable user information forms. Here are some common scenarios:</p>
+            
+            <h3>📝 Minimal Form (Just Name)</h3>
+            <div class="code-block js">
+                <button class="copy-button" onclick="copyToClipboard(this.nextElementSibling)">Copy</button>
+ChatWidget.init({
+    serverUrl: 'http://your-backend-url',
+    userForm: {
+        enabled: true,
+        title: 'What should we call you?',
+        fields: [
+            {
+                id: 'name',
+                type: 'text',
+                label: 'Your Name',
+                placeholder: 'Enter your name',
+                required: true,
+                validation: { minLength: 2 }
+            }
+        ]
+    }
+});
+            </div>
+
+            <h3>🚀 Skip Form Entirely</h3>
+            <div class="code-block js">
+                <button class="copy-button" onclick="copyToClipboard(this.nextElementSibling)">Copy</button>
+ChatWidget.init({
+    serverUrl: 'http://your-backend-url',
+    userForm: {
+        enabled: false // Start chat immediately without asking for info
+    }
+});
+            </div>
+
+            <h3>📋 Custom Fields</h3>
+            <div class="code-block js">
+                <button class="copy-button" onclick="copyToClipboard(this.nextElementSibling)">Copy</button>
+ChatWidget.init({
+    serverUrl: 'http://your-backend-url',
+    userForm: {
+        enabled: true,
+        title: 'Help us serve you better:',
+        fields: [
+            {
+                id: 'name',
+                type: 'text',
+                label: 'Full Name *',
+                required: true,
+                validation: { minLength: 2, maxLength: 50 }
+            },
+            {
+                id: 'email',
+                type: 'email',
+                label: 'Email Address *',
+                required: true
+            },
+            {
+                id: 'subject',
+                type: 'text',
+                label: 'Subject',
+                placeholder: 'What can we help you with?',
+                required: false
+            }
+        ]
+    }
+});
+            </div>
+
+            <h3>🔒 Support Ticket Form</h3>
+            <div class="code-block js">
+                <button class="copy-button" onclick="copyToClipboard(this.nextElementSibling)">Copy</button>
+ChatWidget.init({
+    serverUrl: 'http://your-backend-url',
+    userForm: {
+        enabled: true,
+        title: 'Create Support Ticket:',
+        submitButtonText: 'Start Support Chat',
+        fields: [
+            {
+                id: 'name',
+                type: 'text',
+                label: 'Your Name *',
+                required: true,
+                validation: { minLength: 2 }
+            },
+            {
+                id: 'email',
+                type: 'email',
+                label: 'Email Address *',
+                required: true
+            },
+            {
+                id: 'ticketId',
+                type: 'text',
+                label: 'Ticket ID',
+                placeholder: 'Existing ticket ID (if any)',
+                required: false
+            },
+            {
+                id: 'priority',
+                type: 'text',
+                label: 'Priority Level',
+                placeholder: 'Low, Medium, High, Critical',
+                required: false
+            }
+        ]
     }
 });
             </div>
@@ -605,6 +754,90 @@ ChatWidget.init({
                         <td>Allowed file types/MIME types</td>
                     </tr>
                     <tr>
+                        <td><span class="field-name">userForm.enabled</span></td>
+                        <td><span class="field-type">boolean</span></td>
+                        <td><span class="optional">No</span></td>
+                        <td>true</td>
+                        <td>Enable user information form. Set to false to start chat immediately</td>
+                    </tr>
+                    <tr>
+                        <td><span class="field-name">userForm.title</span></td>
+                        <td><span class="field-type">string</span></td>
+                        <td><span class="optional">No</span></td>
+                        <td>'Please provide your details...'</td>
+                        <td>Title text shown above the form</td>
+                    </tr>
+                    <tr>
+                        <td><span class="field-name">userForm.submitButtonText</span></td>
+                        <td><span class="field-type">string</span></td>
+                        <td><span class="optional">No</span></td>
+                        <td>'Start Chat'</td>
+                        <td>Text for the form submit button</td>
+                    </tr>
+                    <tr>
+                        <td><span class="field-name">userForm.fields</span></td>
+                        <td><span class="field-type">array</span></td>
+                        <td><span class="optional">No</span></td>
+                        <td>[name, phone, email fields]</td>
+                        <td>Array of field objects to show in the form</td>
+                    </tr>
+                    <tr>
+                        <td><span class="field-name">userForm.fields[].id</span></td>
+                        <td><span class="field-type">string</span></td>
+                        <td><span class="required">Yes</span></td>
+                        <td>-</td>
+                        <td>Unique identifier for the field (e.g., 'name', 'email')</td>
+                    </tr>
+                    <tr>
+                        <td><span class="field-name">userForm.fields[].type</span></td>
+                        <td><span class="field-type">string</span></td>
+                        <td><span class="required">Yes</span></td>
+                        <td>-</td>
+                        <td>Input type: 'text', 'email', 'tel', 'url', 'number', 'password'</td>
+                    </tr>
+                    <tr>
+                        <td><span class="field-name">userForm.fields[].label</span></td>
+                        <td><span class="field-type">string</span></td>
+                        <td><span class="required">Yes</span></td>
+                        <td>-</td>
+                        <td>Label text displayed above the input field</td>
+                    </tr>
+                    <tr>
+                        <td><span class="field-name">userForm.fields[].placeholder</span></td>
+                        <td><span class="field-type">string</span></td>
+                        <td><span class="optional">No</span></td>
+                        <td>''</td>
+                        <td>Placeholder text shown inside the input field</td>
+                    </tr>
+                    <tr>
+                        <td><span class="field-name">userForm.fields[].required</span></td>
+                        <td><span class="field-type">boolean</span></td>
+                        <td><span class="optional">No</span></td>
+                        <td>false</td>
+                        <td>Whether the field is required for form submission</td>
+                    </tr>
+                    <tr>
+                        <td><span class="field-name">userForm.fields[].validation.minLength</span></td>
+                        <td><span class="field-type">number</span></td>
+                        <td><span class="optional">No</span></td>
+                        <td>null</td>
+                        <td>Minimum character length for the field</td>
+                    </tr>
+                    <tr>
+                        <td><span class="field-name">userForm.fields[].validation.maxLength</span></td>
+                        <td><span class="field-type">number</span></td>
+                        <td><span class="optional">No</span></td>
+                        <td>null</td>
+                        <td>Maximum character length for the field</td>
+                    </tr>
+                    <tr>
+                        <td><span class="field-name">userForm.fields[].validation.pattern</span></td>
+                        <td><span class="field-type">string</span></td>
+                        <td><span class="optional">No</span></td>
+                        <td>null</td>
+                        <td>Regular expression pattern for field validation</td>
+                    </tr>
+                    <tr>
                         <td><span class="field-name">text.buttonText</span></td>
                         <td><span class="field-type">string</span></td>
                         <td><span class="optional">No</span></td>
@@ -765,6 +998,8 @@ ChatWidget.destroy();
                 <button class="btn" onclick="ChatWidget.open()">Open Chat Widget</button>
                 <button class="btn btn-secondary" onclick="switchTheme('dark')">Try Dark Theme</button>
                 <button class="btn btn-secondary" onclick="switchPosition('bottom-left')">Change Position</button>
+                <button class="btn btn-secondary" onclick="demoMinimalForm()">Try Minimal Form</button>
+                <button class="btn btn-secondary" onclick="demoNoForm()">Try No Form</button>
                 <button class="btn btn-secondary" onclick="location.reload()">Reset Demo</button>
             </div>
             
@@ -848,17 +1083,39 @@ ChatWidget.destroy();
                 icon: 'default',
                 hoverEffect: 'scale'
             },
+
+            // Dynamic user form configuration (NEW!)
+            userForm: {
+                enabled: true, // Set to false to skip form entirely
+                title: 'Help us serve you better:',
+                submitButtonText: 'Start Demo Chat',
+                fields: [
+                    {
+                        id: 'name',
+                        type: 'text',
+                        label: 'Your Name *',
+                        placeholder: 'Enter your name',
+                        required: true,
+                        validation: {
+                            minLength: 2,
+                            maxLength: 50
+                        }
+                    },
+                    {
+                        id: 'email',
+                        type: 'email',
+                        label: 'Email Address',
+                        placeholder: 'Enter your email (optional)',
+                        required: false
+                    }
+                ]
+            },
             
             text: {
                 companyName: 'Demo Support',
                 welcomeMessage: 'Welcome to our chat widget demo! This is a fully functional chat widget.',
                 buttonText: 'Chat with us',
                 connectingText: 'Connecting to chat service...',
-                startChatText: 'Please provide your details to start chatting:',
-                nameLabel: 'Name *',
-                phoneLabel: 'Phone *',
-                emailLabel: 'Email',
-                startChatButton: 'Start Chat',
                 minimizeButton: 'Minimize',
                 closeButton: 'Close',
                 sendButton: 'Send',
@@ -874,6 +1131,7 @@ ChatWidget.destroy();
             setTimeout(() => {
                 ChatWidget.init({
                     serverUrl: 'ws://localhost:3000',
+                    apiKey: 'hello1234',
                     companyName: 'Demo Support',
                     welcomeMessage: 'Theme changed! This is a demo of the chat widget.',
                     theme: theme,
@@ -892,22 +1150,27 @@ ChatWidget.destroy();
                         icon: 'default',
                         hoverEffect: 'scale'
                     },
-                    text: {
-                        companyName: 'Demo Support',
-                        welcomeMessage: 'Theme changed! This is a demo of the chat widget.',
-                        buttonText: 'Chat with us',
-                        connectingText: 'Connecting to chat service...',
-                        startChatText: 'Please provide your details to start chatting:',
-                        nameLabel: 'Name *',
-                        phoneLabel: 'Phone *',
-                        emailLabel: 'Email',
-                        startChatButton: 'Start Chat',
-                        minimizeButton: 'Minimize',
-                        closeButton: 'Close',
-                        sendButton: 'Send',
-                        typingText: 'Agent is typing...',
-                        placeholderText: 'Type your message...',
-                        noMessagesText: 'No messages yet. Start the conversation!'
+                    userForm: {
+                        enabled: true,
+                        title: 'Help us serve you better:',
+                        submitButtonText: 'Start Demo Chat',
+                        fields: [
+                            {
+                                id: 'name',
+                                type: 'text',
+                                label: 'Your Name *',
+                                placeholder: 'Enter your name',
+                                required: true,
+                                validation: { minLength: 2, maxLength: 50 }
+                            },
+                            {
+                                id: 'email',
+                                type: 'email',
+                                label: 'Email Address',
+                                placeholder: 'Enter your email (optional)',
+                                required: false
+                            }
+                        ]
                     }
                 });
             }, 100);
@@ -919,6 +1182,7 @@ ChatWidget.destroy();
             setTimeout(() => {
                 ChatWidget.init({
                     serverUrl: 'ws://localhost:3000',
+                    apiKey: 'hello1234',
                     companyName: 'Demo Support',
                     welcomeMessage: 'Position changed! This is a demo of the chat widget.',
                     theme: currentTheme,
@@ -937,22 +1201,27 @@ ChatWidget.destroy();
                         icon: 'default',
                         hoverEffect: 'scale'
                     },
-                    text: {
-                        companyName: 'Demo Support',
-                        welcomeMessage: 'Position changed! This is a demo of the chat widget.',
-                        buttonText: 'Chat with us',
-                        connectingText: 'Connecting to chat service...',
-                        startChatText: 'Please provide your details to start chatting:',
-                        nameLabel: 'Name *',
-                        phoneLabel: 'Phone *',
-                        emailLabel: 'Email',
-                        startChatButton: 'Start Chat',
-                        minimizeButton: 'Minimize',
-                        closeButton: 'Close',
-                        sendButton: 'Send',
-                        typingText: 'Agent is typing...',
-                        placeholderText: 'Type your message...',
-                        noMessagesText: 'No messages yet. Start the conversation!'
+                    userForm: {
+                        enabled: true,
+                        title: 'Help us serve you better:',
+                        submitButtonText: 'Start Demo Chat',
+                        fields: [
+                            {
+                                id: 'name',
+                                type: 'text',
+                                label: 'Your Name *',
+                                placeholder: 'Enter your name',
+                                required: true,
+                                validation: { minLength: 2, maxLength: 50 }
+                            },
+                            {
+                                id: 'email',
+                                type: 'email',
+                                label: 'Email Address',
+                                placeholder: 'Enter your email (optional)',
+                                required: false
+                            }
+                        ]
                     }
                 });
             }, 100);
@@ -972,6 +1241,69 @@ ChatWidget.destroy();
                 return 'bottom-right';
             }
             return 'bottom-right';
+        }
+
+        // Demo functions for different form configurations
+        function demoMinimalForm() {
+            ChatWidget.destroy();
+            setTimeout(() => {
+                ChatWidget.init({
+                    serverUrl: 'ws://localhost:3000',
+                    apiKey: 'hello1234',
+                    companyName: 'Demo Support',
+                    welcomeMessage: 'Minimal form demo - just your name!',
+                    theme: getCurrentTheme(),
+                    position: { corner: getCurrentPosition(), offset: { x: 20, y: 20 } },
+                    debug: true,
+                    colors: {
+                        primary: '#667eea',
+                        secondary: '#764ba2',
+                        accent: '#ff6b6b',
+                        background: '#ffffff',
+                        text: '#333333'
+                    },
+                    userForm: {
+                        enabled: true,
+                        title: 'What should we call you?',
+                        submitButtonText: 'Start Chat',
+                        fields: [
+                            {
+                                id: 'name',
+                                type: 'text',
+                                label: 'Your Name *',
+                                placeholder: 'Enter your name',
+                                required: true,
+                                validation: { minLength: 2 }
+                            }
+                        ]
+                    }
+                });
+            }, 100);
+        }
+
+        function demoNoForm() {
+            ChatWidget.destroy();
+            setTimeout(() => {
+                ChatWidget.init({
+                    serverUrl: 'ws://localhost:3000',
+                    apiKey: 'hello1234',
+                    companyName: 'Demo Support',
+                    welcomeMessage: 'No form demo - chat starts immediately!',
+                    theme: getCurrentTheme(),
+                    position: { corner: getCurrentPosition(), offset: { x: 20, y: 20 } },
+                    debug: true,
+                    colors: {
+                        primary: '#667eea',
+                        secondary: '#764ba2',
+                        accent: '#ff6b6b',
+                        background: '#ffffff',
+                        text: '#333333'
+                    },
+                    userForm: {
+                        enabled: false // Skip form entirely
+                    }
+                });
+            }, 100);
         }
 
         // Show connection status

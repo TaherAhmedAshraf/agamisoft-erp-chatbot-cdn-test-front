@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat Widget Test - Minimal Form</title>
+    
+    <!-- Required Libraries -->
+    <script src="https://cdn.socket.io/4.7.4/socket.io.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    
+    <!-- Chat Widget -->
+    <link rel="stylesheet" href="chat-widget.css">
+    <script src="chat-widget.js"></script>
+    
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-button {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin: 10px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .test-button:hover {
+            background: #1e7e34;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Chat Widget Test - Minimal Form</h1>
+        <p>This page tests the chat widget with a <strong>minimal form</strong> (just name field)</p>
+        
+        <div>
+            <button class="test-button" onclick="openChat()">Open Chat Widget</button>
+            <button class="test-button" onclick="resetWidget()">Reset Widget</button>
+        </div>
+        
+        <div style="margin-top: 20px;">
+            <h3>Expected Behavior:</h3>
+            <ul>
+                <li>Chat widget button should appear in bottom-right corner</li>
+                <li>When clicked, should show a form asking only for "Your Name"</li>
+                <li>After submitting name, chat conversation should start</li>
+                <li>Welcome message should appear in chat</li>
+                <li>Input field should be available for typing messages</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        // Initialize chat widget with minimal form
+        ChatWidget.init({
+            serverUrl: 'ws://localhost:3000',
+            apiKey: 'hello1234',
+            companyName: 'Test Support',
+            welcomeMessage: 'Welcome! Thanks for providing your name.',
+            debug: true,
+            
+            // Minimal form - just name
+            userForm: {
+                enabled: true,
+                title: 'What should we call you?',
+                submitButtonText: 'Start Chat',
+                fields: [
+                    {
+                        id: 'name',
+                        type: 'text',
+                        label: 'Your Name *',
+                        placeholder: 'Enter your name',
+                        required: true,
+                        validation: {
+                            minLength: 2,
+                            maxLength: 50
+                        }
+                    }
+                ]
+            },
+            
+            colors: {
+                primary: '#28a745',
+                secondary: '#1e7e34',
+                background: '#ffffff',
+                text: '#333333'
+            }
+        });
+
+        function openChat() {
+            ChatWidget.open();
+        }
+
+        function resetWidget() {
+            ChatWidget.destroy();
+            setTimeout(() => {
+                ChatWidget.init({
+                    serverUrl: 'ws://localhost:3000',
+                    apiKey: 'hello1234',
+                    companyName: 'Test Support',
+                    welcomeMessage: 'Welcome! Thanks for providing your name.',
+                    debug: true,
+                    
+                    userForm: {
+                        enabled: true,
+                        title: 'What should we call you?',
+                        submitButtonText: 'Start Chat',
+                        fields: [
+                            {
+                                id: 'name',
+                                type: 'text',
+                                label: 'Your Name *',
+                                placeholder: 'Enter your name',
+                                required: true,
+                                validation: {
+                                    minLength: 2,
+                                    maxLength: 50
+                                }
+                            }
+                        ]
+                    },
+                    
+                    colors: {
+                        primary: '#28a745',
+                        secondary: '#1e7e34',
+                        background: '#ffffff',
+                        text: '#333333'
+                    }
+                });
+            }, 100);
+        }
+
+        // Debug: Check widget state after initialization
+        setTimeout(() => {
+            console.log('Widget state:', ChatWidget.getState());
+        }, 2000);
+    </script>
+</body>
+</html>

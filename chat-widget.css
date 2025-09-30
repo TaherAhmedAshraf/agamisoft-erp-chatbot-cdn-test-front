@@ -331,22 +331,54 @@
     color: var(--chat-text) !important;
 }
 
-.form-group input:focus {
-    /* outline: none;
-    border-color: var(--chat-primary);
-    box-shadow: 0 0 0 3px var(--chat-primary);
-    opacity: 0.1;
-    color: var(--chat-text) !important;
+/* Support different input types */
+.form-group input[type="text"],
+.form-group input[type="email"],
+.form-group input[type="tel"],
+.form-group input[type="url"],
+.form-group input[type="number"],
+.form-group input[type="password"] {
+    width: 100%;
+    padding: 12px 16px;
+    border: 2px solid var(--chat-border) !important;
+    border-radius: 8px;
+    font-size: 14px;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    box-sizing: border-box;
     background: var(--chat-surface) !important;
-    width: 100% !important;
-    padding: 12px 16px !important; */
+    color: var(--chat-text) !important;
+}
 
+.form-group input:focus {
     outline: none;
+    border-color: var(--chat-primary) !important;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 }
 
 .form-group input::placeholder {
     color: var(--chat-text-secondary);
     opacity: 0.7;
+}
+
+/* Input validation states */
+.form-group input:invalid {
+    border-color: var(--chat-error) !important;
+}
+
+.form-group input:valid {
+    border-color: var(--chat-success);
+}
+
+/* Responsive form fields */
+@media (max-width: 480px) {
+    .form-group {
+        margin-bottom: 14px;
+    }
+    
+    .form-group input {
+        padding: 10px 14px;
+        font-size: 16px; /* Prevent zoom on iOS */
+    }
 }
 
 .chat-start-btn {
@@ -1327,7 +1359,7 @@
     flex-direction: column;
     align-items: stretch;
     gap: 8px;
-    max-width: 300px;
+    max-width: 400px;
 }
 
 .attachment-image-preview {
