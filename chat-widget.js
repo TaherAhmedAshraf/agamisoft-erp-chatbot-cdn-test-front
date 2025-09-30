@@ -1260,6 +1260,7 @@
         name: formData.get("name").trim(),
         phone: formData.get("phone").trim(),
         email: formData.get("email").trim(),
+        api_key: this.config.apiKey,
       };
 
       if (!this.state.customerInfo.name || !this.state.customerInfo.phone) {
