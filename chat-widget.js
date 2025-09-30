@@ -447,7 +447,7 @@
                         ${this.generateUserFormHTML()}
 
                         <!-- Chat Messages Container -->
-                        <div class="chat-conversation" style="display: none;max-height:300px;">
+                        <div class="chat-conversation" style="display: none;max-height:400px;">
                             <div class="chat-messages-container">
                                 <div class="chat-messages"></div>
                                 <div class="chat-typing-indicator" style="display: none;">
